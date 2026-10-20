@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Capsule</title>
+    <title>Sound Capsule - Voice Keepsakes for Alice</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -52,7 +52,7 @@
 </head>
 <body class="h-full flex flex-col justify-between text-slate-800 antialiased selection:bg-rose-100 selection:text-rose-600">
 
-    <!-- Top Bar Navigation (Admin Toggle) -->
+    <!-- Top Bar Navigation -->
     <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
         <div class="flex items-center gap-2">
             <div class="w-9 h-9 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-md">
@@ -60,10 +60,6 @@
             </div>
             <span class="font-bold text-lg tracking-tight text-slate-800" id="header-brand">Sound Capsule</span>
         </div>
-        <button id="toggle-settings-btn" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-700 border border-slate-200 shadow-sm hover:bg-slate-50 transition-all">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-            <span id="settings-btn-text">Dropbox Setup</span>
-        </button>
     </header>
 
     <!-- Main Container -->
@@ -76,7 +72,7 @@
                 <!-- Warm Welcome Header -->
                 <div class="text-center space-y-2">
                     <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-600 border border-rose-100">
-                        <i data-lucide="heart" class="w-3.5 h-3.5 mr-1 fill-rose-500"></i> Audio Memory for Alice
+                        <i data-lucide="heart" class="w-3.5 h-3.5 mr-1 fill-rose-500"></i> Sound Capsule for Alice
                     </span>
                     <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900" id="display-title">
                         Record a Story or Song for Alice
@@ -222,16 +218,11 @@
                 <div class="bg-slate-900 text-white rounded-2xl p-4 text-xs space-y-3 shadow-md">
                     <div class="flex items-center gap-2 font-bold text-rose-400 text-sm">
                         <i data-lucide="key" class="w-4 h-4"></i>
-                        How to Get Your Dropbox Access Token:
+                        Dropbox Integration Active
                     </div>
-                    <ol class="list-decimal list-inside space-y-1.5 text-slate-300 leading-relaxed">
-                        <li>Go to <a href="https://www.dropbox.com/developers/apps" target="_blank" class="underline text-rose-300 font-semibold">developer.dropbox.com/apps</a></li>
-                        <li>Click <b>Create app</b> &rarr; Choose <b>Scoped access</b> &rarr; <b>App folder</b>.</li>
-                        <li>Name it (e.g. <span class="font-mono text-white">Sound Capsule</span>).</li>
-                        <li>Under the <b>Permissions</b> tab, check <span class="text-emerald-300 font-mono">files.content.write</span> and click <b>Submit</b>.</li>
-                        <li>Under the <b>Settings</b> tab, click <b>Generated access token</b>.</li>
-                        <li>Copy and paste that token into the box below!</li>
-                    </ol>
+                    <p class="text-slate-300 leading-relaxed">
+                        Your Dropbox token is active. Incoming recordings are uploaded automatically into your Dropbox folder.
+                    </p>
                 </div>
 
                 <!-- Settings Inputs -->
@@ -277,7 +268,7 @@
 
                 <!-- Save Button -->
                 <button id="save-settings-btn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition shadow-md shadow-rose-200">
-                    Save Dropbox Settings
+                    Save Settings
                 </button>
             </div>
 
@@ -285,12 +276,39 @@
     </main>
 
     <!-- Footer -->
-    <footer class="w-full max-w-4xl mx-auto p-4 text-center text-xs text-slate-400">
-        Sound Capsule &bull; Direct Studio Audio Capture
+    <footer class="w-full max-w-4xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+        <div>Sound Capsule &bull; Direct Studio Audio Capture for Alice</div>
+        <button id="toggle-settings-btn" class="hover:text-slate-600 transition flex items-center gap-1 py-1 px-2 rounded hover:bg-slate-100">
+            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Admin Settings
+        </button>
     </footer>
+
+    <!-- PIN Modal -->
+    <div id="pin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xs w-full p-6 space-y-4 shadow-2xl text-center">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                <i data-lucide="key-round" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-lg">Admin Security PIN</h3>
+                <p class="text-xs text-slate-500 mt-1">Enter 4-digit PIN to access settings</p>
+            </div>
+            <div>
+                <input type="password" id="pin-input" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" class="w-full text-center text-2xl font-mono tracking-widest py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                <p id="pin-error" class="hidden text-xs text-rose-600 font-semibold mt-1">Incorrect PIN. Try again.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="pin-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">Cancel</button>
+                <button id="pin-submit-btn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-md shadow-rose-200">Unlock</button>
+            </div>
+        </div>
+    </div>
 
     <!-- JavaScript App Logic -->
     <script>
+        const DEFAULT_DROPBOX_TOKEN = 'sl.u.AG3s7jGfn-krDipw9mgu72api_DWKUGe-U4wGKk97N_D3x14f5XgMUFe3G7ih7bam9nfDKdurxF3c8ObmDRNllpxoRZzzCnpdySemRTxgEMDnEvjimRII-_qmwGORarDlMqSRtGplZ-ml1f7eFcFPvayPhfdHqLjgtoB1A07ZBMDtjOBGHS5_nbhQ3ni8D8kN-HbAAoCkKtG7M2e2Hl9BM9yGEsn1DZlvKzySRpkwPmXjLkuWn7_KwKCEcREsPKd_15WKuasvxnNsUiLDrHcYf5sncbIqEwvsG8bXZszLvXE3cFhtBukc_kWzCk5xgdAkVBcYFMlc7bjDtivgW9SZABd1mluKYDkzremN7mA5N18jPh5YcfNKrl7c3prl37iJU6tV6iXOgV13g59zRFWkiaQnV1f9ZcmO4OYeFa2kYNnnwrpmNeRFIcVEPNgvUeI0zE93vOTaPxz0IgoTXQXcy3fstIYHJ3j9XuEKjcjTC53yOgvAxY0hgbnrvSQnEexR3Qx2IorE9EGsmPieX0juiCUQ-BT1IogbfkdnS0IRJz7TBBX39o_fMiIxf0lJSYnENJlSBYpdmikJDoYboOLFoA2_uSd8WXJ2hEdhCNEhRaX0SPb3Wn6-LAG-Ac9rr_nasWuRV1npv1uvpctngqz5WrkyXy0sLkmhnW1MyQynxobQTbqdC-ci85y5B4WTdUxo_tbJvi1l0WqjoZfj1fHLlC4SrdBmr5iAqvyhZ5qzy-bHdCn0izNLcvQAQeKIbkUduQZlzcoC_Y81PZNP1dfC6g8M24aOcNtWjc4d5y0iFAAsRRVPEJ9tdGmN8gdOV7EcF7b7jPT3g-2u6hzNjPmA5JL1wKV3XG0TUzsbl9WK8BGUkBv23L_d_0C0KmfYm7WyyJRCA_jXTD4vohoizzmfOHDg3qaJkQZW6MIk-0Q339bVCDjbwNhNR7SxLvo89NVpy6jejGNetp4N6HmbNetKE4qfUJSDNR5UTYoMLh7orP5G64BKPVMR0mKGcOSkideKFZ9gEIb0wUATfavsdauVpKL4ASXShe9INHK20VcbdZ_N4dfQ5yYn393VuXUvAx74tMmcCkKkT5CXUEirL2G82B2l6P1QJoxBz7Cz-HRMl2u1wT6Q2b_tPY0__Y9VXr7Xj3Oj0fOe7KsizJxGdaZOW2NuaTab5C733FJSapqE4rqUsuJSr07cD9UZnZqvrxgoUO8mTYSu1jyeiIdRb2xP2v0gjBuNoEPcNw_juBui5H0ROli7fgEjwuueFFFJK-G8H-i1aKgPUwdOgc7xozESV6Oi14j8JUuBFunRXWfB_Vaqkq6QNhGD7iTaJ44TP-PdyPAB0eOAVwfHhz9SkalgCGH';
+        const ADMIN_PIN = '4859';
+
         // Global App State & Config
         let mediaRecorder = null;
         let audioChunks = [];
@@ -309,7 +327,7 @@
             recipient: 'Alice',
             title: 'Record a Story or Song for Alice',
             instructions: 'Sing a lullaby, tell a favourite story, or leave a warm message. We capture high-quality audio so Alice can cherish your voice forever.',
-            dropboxToken: localStorage.getItem('alice_dropbox_token') || '',
+            dropboxToken: localStorage.getItem('alice_dropbox_token') || DEFAULT_DROPBOX_TOKEN,
             audioFormat: localStorage.getItem('alice_audio_format') || 'wav',
             webhook: localStorage.getItem('alice_webhook') || ''
         };
@@ -318,7 +336,6 @@
         const viewGuest = document.getElementById('guest-view');
         const viewSettings = document.getElementById('settings-view');
         const btnToggleSettings = document.getElementById('toggle-settings-btn');
-        const btnSettingsText = document.getElementById('settings-btn-text');
         
         const displayTitle = document.getElementById('display-title');
         const displayInstructions = document.getElementById('display-instructions');
@@ -357,7 +374,13 @@
         const btnDownloadFallback = document.getElementById('download-fallback-btn');
         const btnRecordAnother = document.getElementById('record-another-btn');
 
-        // Admin inputs
+        // Admin inputs & Modal
+        const pinModal = document.getElementById('pin-modal');
+        const pinInput = document.getElementById('pin-input');
+        const pinError = document.getElementById('pin-error');
+        const pinSubmitBtn = document.getElementById('pin-submit-btn');
+        const pinCancelBtn = document.getElementById('pin-cancel-btn');
+
         const inputConfigRecipient = document.getElementById('config-recipient');
         const inputConfigTitle = document.getElementById('config-title');
         const inputConfigDropboxToken = document.getElementById('config-dropbox-token');
@@ -381,23 +404,45 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Toggle Settings View
+        // Security PIN Prompt Logic
         btnToggleSettings.addEventListener('click', () => {
             const isSettingsHidden = viewSettings.classList.contains('hidden');
             if (isSettingsHidden) {
-                viewSettings.classList.remove('hidden');
-                btnSettingsText.textContent = 'Close Settings';
+                pinInput.value = '';
+                pinError.classList.add('hidden');
+                pinModal.classList.remove('hidden');
+                pinInput.focus();
             } else {
                 viewSettings.classList.add('hidden');
-                btnSettingsText.textContent = 'Dropbox Setup';
             }
+        });
+
+        pinCancelBtn.addEventListener('click', () => {
+            pinModal.classList.add('hidden');
+        });
+
+        function verifyPin() {
+            if (pinInput.value.trim() === ADMIN_PIN) {
+                pinModal.classList.add('hidden');
+                viewSettings.classList.remove('hidden');
+                viewSettings.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                pinError.classList.remove('hidden');
+                pinInput.value = '';
+                pinInput.focus();
+            }
+        }
+
+        pinSubmitBtn.addEventListener('click', verifyPin);
+        pinInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') verifyPin();
         });
 
         // Save Admin Settings
         btnSaveSettings.addEventListener('click', () => {
             config.recipient = inputConfigRecipient.value || 'Alice';
             config.title = inputConfigTitle.value || 'Record a Story for Alice';
-            config.dropboxToken = inputConfigDropboxToken.value.trim();
+            config.dropboxToken = inputConfigDropboxToken.value.trim() || DEFAULT_DROPBOX_TOKEN;
             config.audioFormat = inputConfigAudioFormat.value;
             config.webhook = inputConfigWebhook.value.trim();
 
@@ -409,7 +454,6 @@
             qualityBadge.textContent = config.audioFormat === 'wav' ? 'Studio Audio (48kHz WAV)' : 'High Bitrate MP3/AAC';
 
             viewSettings.classList.add('hidden');
-            btnSettingsText.textContent = 'Dropbox Setup';
         });
 
         // Helper: Convert AudioBuffer to Uncompressed WAV PCM Blob
@@ -494,7 +538,6 @@
                 mediaRecorder.onstop = async () => {
                     const rawBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                     
-                    // Convert to WAV if requested in settings
                     if (config.audioFormat === 'wav') {
                         try {
                             const arrayBuffer = await rawBlob.arrayBuffer();
@@ -526,7 +569,6 @@
                 labelRecord.textContent = 'Tap to Stop';
                 visualizerPlaceholder.classList.add('hidden');
 
-                // Timer
                 recordingSeconds = 0;
                 timerDisplay.textContent = '00:00';
                 timerInterval = setInterval(() => {
@@ -561,7 +603,6 @@
             }
         }
 
-        // Visualizer Loop
         function drawVisualizer() {
             if (!isRecording || !analyser) return;
 
@@ -589,13 +630,11 @@
             animFrameId = requestAnimationFrame(drawVisualizer);
         }
 
-        // Record Button Click
         btnRecord.addEventListener('click', () => {
             if (!isRecording) startRecording();
             else stopRecording();
         });
 
-        // Re-record Button
         btnRerecord.addEventListener('click', () => {
             playbackControls.classList.add('hidden');
             formInputs.classList.remove('hidden');
@@ -605,15 +644,13 @@
             canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
         });
 
-        // Helper to sanitize filenames safely for Dropbox
         function sanitizeFilename(str) {
             return str
                 .trim()
-                .replace(/[/\\?%*:|"<>]/g, '') // remove forbidden path characters
-                .replace(/\s+/g, ' ');         // collapse multiple spaces
+                .replace(/[/\\?%*:|"<>]/g, '')
+                .replace(/\s+/g, ' ');
         }
 
-        // Form Validation for Name & Title
         function validateInputs() {
             let isValid = true;
             const senderNameVal = inputSenderName.value.trim();
@@ -640,7 +677,6 @@
             return isValid;
         }
 
-        // Remove error styling on user typing
         inputSenderName.addEventListener('input', () => {
             if (inputSenderName.value.trim()) {
                 inputSenderName.classList.remove('border-rose-500', 'bg-rose-50/30');
@@ -655,13 +691,11 @@
             }
         });
 
-        // Update Progress UI
         function setUploadProgress(percent) {
             progressText.textContent = `${Math.round(percent)}%`;
             progressCircle.setAttribute('stroke-dasharray', `${percent}, 100`);
         }
 
-        // Direct Upload to Dropbox via Dropbox API
         function uploadToDropboxDirect(fileBlob, fileName) {
             return new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
@@ -700,7 +734,6 @@
             });
         }
 
-        // Submit Action (Send to Alice)
         btnSubmit.addEventListener('click', async () => {
             if (!validateInputs()) {
                 formInputs.classList.remove('hidden');
@@ -712,12 +745,10 @@
             const recordTitle = sanitizeFilename(inputRecordingTitle.value);
             const fileExt = config.audioFormat === 'wav' ? 'wav' : 'mp3';
             
-            // Format strictly as: "[Name] - [Song or Story Title].[ext]"
             const fileName = `${senderName} - ${recordTitle}.${fileExt}`;
 
             if (!audioBlob) return;
 
-            // Hide controls & show progress loader
             recordControlsContainer.classList.add('hidden');
             playbackControls.classList.add('hidden');
             uploadingView.classList.remove('hidden');
@@ -725,7 +756,6 @@
 
             let uploadSuccess = false;
 
-            // Attempt Direct Dropbox Upload if Token Provided
             if (config.dropboxToken) {
                 try {
                     uploadSubtext.textContent = "Uploading directly to Alice's Dropbox...";
@@ -736,7 +766,6 @@
                 }
             }
 
-            // Fallback Webhook Attempt
             if (!uploadSuccess && config.webhook) {
                 try {
                     uploadSubtext.textContent = "Sending via backup server...";
@@ -754,12 +783,10 @@
                 }
             }
 
-            // If no token or network failed, auto-trigger local download backup
             if (!config.dropboxToken && !config.webhook) {
                 triggerLocalDownload(fileName);
             }
 
-            // Transition to Success Screen
             uploadingView.classList.add('hidden');
             formInputs.classList.add('hidden');
             successView.classList.remove('hidden');
@@ -776,7 +803,6 @@
             document.body.removeChild(a);
         }
 
-        // Local Backup Download Button
         btnDownloadFallback.addEventListener('click', () => {
             const senderName = sanitizeFilename(inputSenderName.value) || 'FamilyMember';
             const recordTitle = sanitizeFilename(inputRecordingTitle.value) || 'Story';
@@ -785,13 +811,11 @@
             triggerLocalDownload(fileName);
         });
 
-        // Record Another Song or Story Button
         btnRecordAnother.addEventListener('click', () => {
             successView.classList.add('hidden');
             formInputs.classList.remove('hidden');
             recordControlsContainer.classList.remove('hidden');
             
-            // Clear input fields for next entry
             inputRecordingTitle.value = '';
             
             audioBlob = null;
