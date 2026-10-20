@@ -1,828 +1,621 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sound Capsule - Voice Keepsakes for Alice</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        amber: {
-                            50: '#fffbeb',
-                            100: '#fef3c7',
-                            500: '#f59e0b',
-                            600: '#d97706',
-                            700: '#b45309',
-                        },
-                        rose: {
-                            50: '#fff1f2',
-                            100: '#ffe4e6',
-                            500: '#f43f5e',
-                            600: '#e11d48',
-                            700: '#be123c',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .pulse-ring {
-            box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5);
-            animation: pulse-ring 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
-        }
-        @keyframes pulse-ring {
-            to { box-shadow: 0 0 0 20px rgba(225, 29, 72, 0); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sound Capsule — Voice Recordings for Alice</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .recording-pulse {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
 </head>
-<body class="h-full flex flex-col justify-between text-slate-800 antialiased selection:bg-rose-100 selection:text-rose-600">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased relative selection:bg-rose-500 selection:text-white">
 
-    <!-- Top Bar Navigation -->
-    <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
-        <div class="flex items-center gap-2">
-            <div class="w-9 h-9 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-md">
-                <i data-lucide="mic" class="w-5 h-5"></i>
-            </div>
-            <span class="font-bold text-lg tracking-tight text-slate-800" id="header-brand">Sound Capsule</span>
-        </div>
+  <!-- TOP-RIGHT LANGUAGE TOGGLE -->
+  <div class="absolute top-4 right-4 z-50 flex items-center gap-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-full p-1 text-xs font-semibold shadow-lg">
+    <button id="lang-en" onclick="setLanguage('en')" class="px-3 py-1.5 rounded-full transition-all bg-rose-600 text-white shadow-sm">
+      English
+    </button>
+    <button id="lang-es" onclick="setLanguage('es')" class="px-3 py-1.5 rounded-full transition-all text-slate-400 hover:text-white">
+      Español
+    </button>
+  </div>
+
+  <div class="max-w-xl w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-between">
+    
+    <!-- HEADER -->
+    <header class="text-center mt-6 mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl mb-4 text-rose-400 shadow-inner">
+        <i data-lucide="mic" class="w-8 h-8"></i>
+      </div>
+      <h1 id="ui-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+        Sound Capsule
+      </h1>
+      <p id="ui-subtitle" class="text-slate-400 text-sm sm:text-base max-w-md mx-auto">
+        Record a story, song, or lullaby for <span class="font-bold text-rose-400">Alice</span> directly from your phone!
+      </p>
     </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow flex items-center justify-center p-4 md:p-6">
-        <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden transition-all duration-300">
-            
-            <!-- ================= GUEST RECORDING VIEW ================= -->
-            <div id="guest-view" class="p-6 md:p-8 flex flex-col gap-6">
-                
-                <!-- Warm Welcome Header -->
-                <div class="text-center space-y-2">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-600 border border-rose-100">
-                        <i data-lucide="heart" class="w-3.5 h-3.5 mr-1 fill-rose-500"></i> Sound Capsule for Alice
-                    </span>
-                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900" id="display-title">
-                        Record a Story or Song for Alice
-                    </h1>
-                    <p class="text-slate-500 text-sm md:text-base max-w-sm mx-auto" id="display-instructions">
-                        Sing a lullaby, tell a favourite story, or leave a warm message. We capture high-quality audio so Alice can cherish your voice forever.
-                    </p>
-                </div>
+    <!-- MAIN RECORDING CARD -->
+    <main class="bg-slate-800/60 backdrop-blur-md border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+      
+      <!-- INSTRUCTIONS / WARNING BOX -->
+      <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-400 shrink-0 mt-0.5"></i>
+        <p id="ui-warning" class="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
+          <strong class="font-semibold text-amber-300">Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.</strong>
+        </p>
+      </div>
 
-                <!-- Input Details Form -->
-                <div id="form-inputs" class="space-y-4">
-                    <div>
-                        <label for="sender-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Your Name *</label>
-                        <input type="text" id="sender-name" placeholder="e.g. Grandma Helen / Uncle David" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
-                        <p id="sender-name-error" class="hidden text-xs text-rose-600 font-medium mt-1">Please enter your name.</p>
-                    </div>
-                    <div>
-                        <label for="recording-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Song / Story Title *</label>
-                        <input type="text" id="recording-title" placeholder="e.g. Bedtime Lullaby & Wishes" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
-                        <p id="recording-title-error" class="hidden text-xs text-rose-600 font-medium mt-1">Please enter a song or story title.</p>
-                    </div>
-                </div>
+      <!-- VISUALIZER / RECORDING STATUS AREA -->
+      <div id="recording-area" class="flex flex-col items-center justify-center py-6 min-h-[160px] rounded-2xl bg-slate-900/40 border border-slate-800 relative overflow-hidden">
+        
+        <!-- Live Visualizer Canvas -->
+        <canvas id="visualizer" class="w-full h-24 hidden"></canvas>
 
-                <!-- Microphone Permission Error Callout -->
-                <div id="mic-error" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm space-y-2">
-                    <div class="flex items-center gap-2 font-semibold text-amber-900">
-                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i>
-                        Microphone Access Blocked
-                    </div>
-                    <p id="mic-error-text">Please allow microphone access in your browser settings to record your voice memory.</p>
-                </div>
-
-                <!-- Visualizer & Audio Status -->
-                <div class="flex flex-col items-center justify-center space-y-3 pt-1">
-                    <!-- Canvas Waveform Visualizer -->
-                    <div class="w-full h-20 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden relative flex items-center justify-center">
-                        <canvas id="visualizer-canvas" class="w-full h-full block"></canvas>
-                        <div id="visualizer-placeholder" class="absolute inset-0 flex items-center justify-center text-xs text-slate-400 font-medium">
-                            <i data-lucide="activity" class="w-4 h-4 mr-1.5 opacity-60"></i> Ready to record
-                        </div>
-                    </div>
-
-                    <!-- Recording Timer & Quality Tag -->
-                    <div class="flex items-center gap-3 text-xs font-mono">
-                        <div id="recording-timer" class="font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                            00:00
-                        </div>
-                        <span id="quality-badge" class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-medium text-[10px] uppercase tracking-wider">
-                            Studio Audio (48kHz WAV)
-                        </span>
-                    </div>
-                </div>
-
-                <!-- IMPORTANT NOTICE NEAR RECORD BUTTON -->
-                <div class="bg-amber-50/90 border border-amber-200 rounded-2xl p-3.5 text-amber-900 text-xs text-center space-y-1 shadow-sm">
-                    <p class="font-bold text-amber-950 flex items-center justify-center gap-1.5">
-                        <i data-lucide="volume-2" class="w-4 h-4 text-amber-600"></i>
-                        For the best audio quality:
-                    </p>
-                    <p class="font-bold text-amber-900">
-                        Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.
-                    </p>
-                </div>
-
-                <!-- Primary Action Buttons -->
-                <div id="record-controls-container" class="flex flex-col items-center gap-3">
-                    <!-- Giant Record/Stop Button -->
-                    <button id="record-btn" class="w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white flex items-center justify-center shadow-lg shadow-rose-200 transition-all cursor-pointer">
-                        <i data-lucide="mic" id="record-icon" class="w-9 h-9"></i>
-                    </button>
-                    <span id="record-btn-label" class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tap to Record</span>
-
-                    <!-- Playback & Re-record Controls (Shown after stop) -->
-                    <div id="playback-controls" class="hidden w-full flex-col items-center gap-3 pt-2">
-                        <audio id="audio-preview" controls class="w-full rounded-xl"></audio>
-                        <div class="flex w-full gap-3">
-                            <button id="rerecord-btn" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition flex items-center justify-center gap-2">
-                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Re-record
-                            </button>
-                            <button id="submit-btn" class="flex-1 py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-sm transition shadow-md shadow-rose-200 flex items-center justify-center gap-2">
-                                <i data-lucide="send" class="w-4 h-4"></i> Send to Alice
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Progress / Uploading View -->
-                <div id="uploading-view" class="hidden py-8 flex flex-col items-center justify-center text-center space-y-4">
-                    <div class="relative w-20 h-20 flex items-center justify-center">
-                        <!-- Outer Progress Circle -->
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="progress-circle" class="text-rose-600 transition-all duration-300" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <span id="progress-text" class="absolute font-bold text-sm text-slate-800">0%</span>
-                    </div>
-                    <div class="space-y-1">
-                        <h3 class="font-bold text-slate-900 text-lg">Sending your recording...</h3>
-                        <p id="upload-status-subtext" class="text-xs text-slate-500">Uploading directly to Alice's Dropbox</p>
-                    </div>
-                </div>
-
-                <!-- Success Confirmation View -->
-                <div id="success-view" class="hidden text-center py-4 space-y-5">
-                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
-                        <i data-lucide="check-circle" class="w-10 h-10"></i>
-                    </div>
-                    <div class="space-y-1.5">
-                        <h2 class="text-2xl font-bold text-slate-900">Thank You!</h2>
-                        <p class="text-sm text-slate-600 max-w-xs mx-auto leading-relaxed" id="success-message">
-                            Your voice recording has been safely delivered straight to Alice's Dropbox.
-                        </p>
-                    </div>
-
-                    <!-- Prominent FULL Action Button -->
-                    <div class="pt-2 flex flex-col gap-3">
-                        <button id="record-another-btn" class="w-full py-4 px-6 rounded-2xl bg-rose-600 hover:bg-rose-500 active:scale-[0.98] text-white font-bold text-base shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="mic" class="w-5 h-5"></i>
-                            Record Another Song or Story
-                        </button>
-                        
-                        <button id="download-fallback-btn" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium text-xs rounded-xl transition flex items-center justify-center gap-1.5">
-                            <i data-lucide="download" class="w-3.5 h-3.5"></i> Save Local Backup Copy
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ================= ADMIN & DROPBOX SETTINGS PANEL ================= -->
-            <div id="settings-view" class="hidden p-6 md:p-8 space-y-6 bg-slate-50/50 border-t border-slate-100">
-                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-900">Direct Dropbox Integration</h2>
-                        <p class="text-xs text-slate-500">Configure direct background file delivery</p>
-                    </div>
-                    <span class="p-2 bg-rose-100 text-rose-600 rounded-lg">
-                        <i data-lucide="box" class="w-5 h-5"></i>
-                    </span>
-                </div>
-
-                <!-- Instructions Card -->
-                <div class="bg-slate-900 text-white rounded-2xl p-4 text-xs space-y-3 shadow-md">
-                    <div class="flex items-center gap-2 font-bold text-rose-400 text-sm">
-                        <i data-lucide="key" class="w-4 h-4"></i>
-                        Dropbox Integration Active
-                    </div>
-                    <p class="text-slate-300 leading-relaxed">
-                        Your Dropbox token is active. Incoming recordings are uploaded automatically into your Dropbox folder.
-                    </p>
-                </div>
-
-                <!-- Settings Inputs -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                            Dropbox Generated Access Token *
-                        </label>
-                        <input type="password" id="config-dropbox-token" placeholder="sl.B..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white">
-                        <p class="text-[11px] text-slate-500 mt-1">Allows guests to upload audio files directly to your Dropbox folder without extra clicks.</p>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                            Audio Format
-                        </label>
-                        <select id="config-audio-format" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
-                            <option value="wav">WAV (Uncompressed Studio PCM - Highest Quality)</option>
-                            <option value="mp3">MP3 / AAC (High Bitrate Compressed)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                            Fallback Webhook / Backend Endpoint (Optional)
-                        </label>
-                        <input type="url" id="config-webhook" placeholder="https://hook.make.com/..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-rose-500 focus:outline-none bg-white">
-                    </div>
-                </div>
-
-                <!-- Content Text Settings -->
-                <div class="space-y-3 pt-3 border-t border-slate-200">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Text Customization</h3>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Recipient Name</label>
-                        <input type="text" id="config-recipient" value="Alice" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Header Title</label>
-                        <input type="text" id="config-title" value="Record a Story or Song for Alice" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white">
-                    </div>
-                </div>
-
-                <!-- Save Button -->
-                <button id="save-settings-btn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm transition shadow-md shadow-rose-200">
-                    Save Settings
-                </button>
-            </div>
-
+        <!-- Idle Mic Graphic -->
+        <div id="idle-icon" class="flex flex-col items-center text-slate-500 space-y-2">
+          <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+            <i data-lucide="music-4" class="w-8 h-8 text-slate-400"></i>
+          </div>
+          <span id="ui-ready-text" class="text-xs uppercase tracking-wider font-bold text-slate-500">Ready to record</span>
         </div>
+
+        <!-- Timer Display -->
+        <div id="timer-display" class="hidden text-3xl font-mono font-bold tracking-wider text-rose-400 mt-2">
+          00:00
+        </div>
+      </div>
+
+      <!-- RECORDING CONTROLS -->
+      <div id="controls-step-1" class="flex flex-col items-center gap-4">
+        <button id="record-btn" onclick="toggleRecording()" class="w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 active:scale-95">
+          <i data-lucide="disc" class="w-6 h-6"></i>
+          <span id="record-btn-text">Start Recording</span>
+        </button>
+      </div>
+
+      <!-- REVIEW & FORM STEP (HIDDEN INITIALLY) -->
+      <div id="controls-step-2" class="space-y-5 hidden">
+        
+        <!-- Audio Preview Player -->
+        <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-700/50">
+          <audio id="audio-preview" controls class="w-full focus:outline-none"></audio>
+        </div>
+
+        <!-- User Metadata Inputs -->
+        <div class="space-y-4">
+          <div>
+            <label id="ui-label-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+              Your Name <span class="text-rose-400">*</span>
+            </label>
+            <input type="text" id="user-name" placeholder="e.g. Grandma Helen" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
+          </div>
+
+          <div>
+            <label id="ui-label-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
+              Song or Story Title <span class="text-rose-400">*</span>
+            </label>
+            <input type="text" id="song-title" placeholder="e.g. You Are My Sunshine" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
+          </div>
+        </div>
+
+        <!-- Validation Error Box -->
+        <div id="validation-error" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+          <span id="ui-validation-msg">Please fill out both your name and title before sending.</span>
+        </div>
+
+        <!-- Progress Bar & Wheel (Hidden Initially) -->
+        <div id="upload-progress-container" class="hidden space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-300 font-semibold">
+            <span id="ui-uploading-text" class="flex items-center gap-2">
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-rose-400"></i>
+              Sending to Alice's Dropbox...
+            </span>
+            <span id="upload-percentage" class="text-rose-400 font-mono">0%</span>
+          </div>
+          <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
+            <div id="upload-progress-bar" class="bg-rose-500 h-full w-0 transition-all duration-150"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="space-y-3 pt-2">
+          <button id="send-btn" onclick="sendRecording()" class="w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition-all active:scale-95">
+            <i data-lucide="send" class="w-5 h-5"></i>
+            <span id="ui-send-btn-text">Send to Alice</span>
+          </button>
+
+          <!-- PROMINENT RECORD ANOTHER BUTTON -->
+          <button id="re-record-btn" onclick="resetApp()" class="w-full py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 bg-slate-700/80 hover:bg-slate-700 text-slate-200 border border-slate-600 transition-all active:scale-95">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span id="ui-record-another-btn">Record Another Song or Story</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- SUCCESS CONFIRMATION STEP (HIDDEN INITIALLY) -->
+      <div id="controls-step-3" class="hidden text-center py-6 space-y-5">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+          <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+        </div>
+        <div>
+          <h2 id="ui-success-title" class="text-2xl font-bold text-white mb-1">Recording Sent!</h2>
+          <p id="ui-success-msg" class="text-slate-400 text-sm">Thank you so much for capturing this sweet memory for Alice.</p>
+        </div>
+        <button onclick="resetApp()" class="w-full py-4 px-6 rounded-2xl font-bold text-base bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <span id="ui-record-another-success">Record Another Song or Story</span>
+        </button>
+      </div>
+
     </main>
 
-    <!-- Footer -->
-    <footer class="w-full max-w-4xl mx-auto p-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
-        <div>Sound Capsule &bull; Direct Studio Audio Capture for Alice</div>
-        <button id="toggle-settings-btn" class="hover:text-slate-600 transition flex items-center gap-1 py-1 px-2 rounded hover:bg-slate-100">
-            <i data-lucide="lock" class="w-3.5 h-3.5"></i> Admin Settings
-        </button>
+    <!-- FOOTER WITH PASSCODE-PROTECTED SETTINGS -->
+    <footer class="text-center mt-8 pt-4 border-t border-slate-800 text-xs text-slate-500 flex items-center justify-between px-2">
+      <span>Sound Capsule &copy; 2026</span>
+      <button onclick="openPasscodeModal()" class="hover:text-slate-400 flex items-center gap-1 transition-colors">
+        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+        <span id="ui-settings-footer">Admin Settings</span>
+      </button>
     </footer>
 
-    <!-- PIN Modal -->
-    <div id="pin-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-xs w-full p-6 space-y-4 shadow-2xl text-center">
-            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto">
-                <i data-lucide="key-round" class="w-6 h-6"></i>
-            </div>
-            <div>
-                <h3 class="font-bold text-slate-900 text-lg">Admin Security PIN</h3>
-                <p class="text-xs text-slate-500 mt-1">Enter 4-digit PIN to access settings</p>
-            </div>
-            <div>
-                <input type="password" id="pin-input" maxlength="4" pattern="[0-9]*" inputmode="numeric" placeholder="••••" class="w-full text-center text-2xl font-mono tracking-widest py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-rose-500 focus:outline-none">
-                <p id="pin-error" class="hidden text-xs text-rose-600 font-semibold mt-1">Incorrect PIN. Try again.</p>
-            </div>
-            <div class="flex gap-2">
-                <button id="pin-cancel-btn" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">Cancel</button>
-                <button id="pin-submit-btn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs shadow-md shadow-rose-200">Unlock</button>
-            </div>
-        </div>
+  </div>
+
+  <!-- PASSCODE MODAL -->
+  <div id="passcode-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 id="ui-passcode-title" class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="shield-lock" class="w-5 h-5 text-rose-400"></i>
+          Admin Access
+        </h3>
+        <button onclick="closePasscodeModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <p id="ui-passcode-prompt" class="text-xs text-slate-400">Enter your 4-digit passcode to edit settings.</p>
+      <input type="password" id="passcode-input" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest bg-slate-900 border border-slate-700 rounded-xl py-2 text-white focus:outline-none focus:border-rose-500">
+      <div id="passcode-error" class="hidden text-xs text-rose-400 text-center font-semibold">
+        Incorrect passcode. Please try again.
+      </div>
+      <button onclick="verifyPasscode()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-sm transition-all">
+        Unlock Settings
+      </button>
     </div>
+  </div>
 
-    <!-- JavaScript App Logic -->
-    <script>
-        const DEFAULT_DROPBOX_TOKEN = 'sl.u.AG3s7jGfn-krDipw9mgu72api_DWKUGe-U4wGKk97N_D3x14f5XgMUFe3G7ih7bam9nfDKdurxF3c8ObmDRNllpxoRZzzCnpdySemRTxgEMDnEvjimRII-_qmwGORarDlMqSRtGplZ-ml1f7eFcFPvayPhfdHqLjgtoB1A07ZBMDtjOBGHS5_nbhQ3ni8D8kN-HbAAoCkKtG7M2e2Hl9BM9yGEsn1DZlvKzySRpkwPmXjLkuWn7_KwKCEcREsPKd_15WKuasvxnNsUiLDrHcYf5sncbIqEwvsG8bXZszLvXE3cFhtBukc_kWzCk5xgdAkVBcYFMlc7bjDtivgW9SZABd1mluKYDkzremN7mA5N18jPh5YcfNKrl7c3prl37iJU6tV6iXOgV13g59zRFWkiaQnV1f9ZcmO4OYeFa2kYNnnwrpmNeRFIcVEPNgvUeI0zE93vOTaPxz0IgoTXQXcy3fstIYHJ3j9XuEKjcjTC53yOgvAxY0hgbnrvSQnEexR3Qx2IorE9EGsmPieX0juiCUQ-BT1IogbfkdnS0IRJz7TBBX39o_fMiIxf0lJSYnENJlSBYpdmikJDoYboOLFoA2_uSd8WXJ2hEdhCNEhRaX0SPb3Wn6-LAG-Ac9rr_nasWuRV1npv1uvpctngqz5WrkyXy0sLkmhnW1MyQynxobQTbqdC-ci85y5B4WTdUxo_tbJvi1l0WqjoZfj1fHLlC4SrdBmr5iAqvyhZ5qzy-bHdCn0izNLcvQAQeKIbkUduQZlzcoC_Y81PZNP1dfC6g8M24aOcNtWjc4d5y0iFAAsRRVPEJ9tdGmN8gdOV7EcF7b7jPT3g-2u6hzNjPmA5JL1wKV3XG0TUzsbl9WK8BGUkBv23L_d_0C0KmfYm7WyyJRCA_jXTD4vohoizzmfOHDg3qaJkQZW6MIk-0Q339bVCDjbwNhNR7SxLvo89NVpy6jejGNetp4N6HmbNetKE4qfUJSDNR5UTYoMLh7orP5G64BKPVMR0mKGcOSkideKFZ9gEIb0wUATfavsdauVpKL4ASXShe9INHK20VcbdZ_N4dfQ5yYn393VuXUvAx74tMmcCkKkT5CXUEirL2G82B2l6P1QJoxBz7Cz-HRMl2u1wT6Q2b_tPY0__Y9VXr7Xj3Oj0fOe7KsizJxGdaZOW2NuaTab5C733FJSapqE4rqUsuJSr07cD9UZnZqvrxgoUO8mTYSu1jyeiIdRb2xP2v0gjBuNoEPcNw_juBui5H0ROli7fgEjwuueFFFJK-G8H-i1aKgPUwdOgc7xozESV6Oi14j8JUuBFunRXWfB_Vaqkq6QNhGD7iTaJ44TP-PdyPAB0eOAVwfHhz9SkalgCGH';
-        const ADMIN_PIN = '4859';
+  <!-- SETTINGS MODAL (LOCKED) -->
+  <div id="settings-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-rose-400"></i>
+          Dropbox Configuration
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Dropbox Access Token</label>
+          <textarea id="dropbox-token-input" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white font-mono text-xs focus:outline-none focus:border-rose-500"></textarea>
+        </div>
+        <p class="text-slate-400">
+          This token allows family members to upload files directly into your Dropbox folder in the background.
+        </p>
+      </div>
 
-        // Global App State & Config
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let rawAudioBuffer = null;
-        let audioBlob = null;
-        let audioUrl = null;
-        let audioContext = null;
-        let analyser = null;
-        let microphoneStream = null;
-        let animFrameId = null;
-        let timerInterval = null;
-        let recordingSeconds = 0;
-        let isRecording = false;
+      <div class="pt-2 flex gap-2">
+        <button onclick="saveSettings()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-all">
+          Save Token
+        </button>
+        <button onclick="closeSettingsModal()" class="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-xl text-sm transition-all">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 
-        let config = {
-            recipient: 'Alice',
-            title: 'Record a Story or Song for Alice',
-            instructions: 'Sing a lullaby, tell a favourite story, or leave a warm message. We capture high-quality audio so Alice can cherish your voice forever.',
-            dropboxToken: localStorage.getItem('alice_dropbox_token') || DEFAULT_DROPBOX_TOKEN,
-            audioFormat: localStorage.getItem('alice_audio_format') || 'wav',
-            webhook: localStorage.getItem('alice_webhook') || ''
+  <!-- APP SCRIPT LOGIC -->
+  <script>
+    // HARDCODED DROPBOX ACCESS TOKEN
+    const DEFAULT_DROPBOX_TOKEN = "sl.u.AG3s7jGfn-krDipw9mgu72api_DWKUGe-U4wGKk97N_D3x14f5XgMUFe3G7ih7bam9nfDKdurxF3c8ObmDRNllpxoRZzzCnpdySemRTxgEMDnEvjimRII-_qmwGORarDlMqSRtGplZ-ml1f7eFcFPvayPhfdHqLjgtoB1A07ZBMDtjOBGHS5_nbhQ3ni8D8kN-HbAAoCkKtG7M2e2Hl9BM9yGEsn1DZlvKzySRpkwPmXjLkuWn7_KwKCEcREsPKd_15WKuasvxnNsUiLDrHcYf5sncbIqEwvsG8bXZszLvXE3cFhtBukc_kWzCk5xgdAkVBcYFMlc7bjDtivgW9SZABd1mluKYDkzremN7mA5N18jPh5YcfNKrl7c3prl37iJU6tV6iXOgV13g59zRFWkiaQnV1f9ZcmO4OYeFa2kYNnnwrpmNeRFIcVEPNgvUeI0zE93vOTaPxz0IgoTXQXcy3fstIYHJ3j9XuEKjcjTC53yOgvAxY0hgbnrvSQnEexR3Qx2IorE9EGsmPieX0juiCUQ-BT1IogbfkdnS0IRJz7TBBX39o_fMiIxf0lJSYnENJlSBYpdmikJDoYboOLFoA2_uSd8WXJ2hEdhCNEhRaX0SPb3Wn6-LAG-Ac9rr_nasWuRV1npv1uvpctngqz5WrkyXy0sLkmhnW1MyQynxobQTbqdC-ci85y5B4WTdUxo_tbJvi1l0WqjoZfj1fHLlC4SrdBmr5iAqvyhZ5qzy-bHdCn0izNLcvQAQeKIbkUduQZlzcoC_Y81PZNP1dfC6g8M24aOcNtWjc4d5y0iFAAsRRVPEJ9tdGmN8gdOV7EcF7b7jPT3g-2u6hzNjPmA5JL1wKV3XG0TUzsbl9WK8BGUkBv23L_d_0C0KmfYm7WyyJRCA_jXTD4vohoizzmfOHDg3qaJkQZW6MIk-0Q339bVCDjbwNhNR7SxLvo89NVpy6jejGNetp4N6HmbNetKE4qfUJSDNR5UTYoMLh7orP5G64BKPVMR0mKGcOSkideKFZ9gEIb0wUATfavsdauVpKL4ASXShe9INHK20VcbdZ_N4dfQ5yYn393VuXUvAx74tMmcCkKkT5CXUEirL2G82B2l6P1QJoxBz7Cz-HRMl2u1wT6Q2b_tPY0__Y9VXr7Xj3Oj0fOe7KsizJxGdaZOW2NuaTab5C733FJSapqE4rqUsuJSr07cD9UZnZqvrxgoUO8mTYSu1jyeiIdRb2xP2v0gjBuNoEPcNw_juBui5H0ROli7fgEjwuueFFFJK-G8H-i1aKgPUwdOgc7xozESV6Oi14j8JUuBFunRXWfB_Vaqkq6QNhGD7iTaJ44TP-PdyPAB0eOAVwfHhz9SkalgCGH";
+
+    // TRANSLATIONS DICTIONARY
+    const i18n = {
+      en: {
+        title: "Sound Capsule",
+        subtitle: "Record a story, song, or lullaby for <span class='font-bold text-rose-400'>Alice</span> directly from your phone!",
+        warning: "<strong class='font-semibold text-amber-300'>Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.</strong>",
+        readyText: "Ready to record",
+        startRecord: "Start Recording",
+        stopRecord: "Stop & Review",
+        labelName: "Your Name *",
+        labelTitle: "Song or Story Title *",
+        placeholderName: "e.g. Grandma Helen",
+        placeholderTitle: "e.g. You Are My Sunshine",
+        validationMsg: "Please fill out both your name and title before sending.",
+        uploading: "Sending to Alice's Dropbox...",
+        sendBtn: "Send to Alice",
+        recordAnother: "Record Another Song or Story",
+        successTitle: "Recording Sent!",
+        successMsg: "Thank you so much for capturing this sweet memory for Alice.",
+        settingsFooter: "Admin Settings",
+        passcodeTitle: "Admin Access",
+        passcodePrompt: "Enter your 4-digit passcode to edit settings."
+      },
+      es: {
+        title: "Sound Capsule",
+        subtitle: "¡Graba una historia, canción o nana para <span class='font-bold text-rose-400'>Alice</span> directamente desde tu teléfono!",
+        warning: "<strong class='font-semibold text-amber-300'>Por favor, graba en una habitación silenciosa y asegúrate de no usar auriculares Bluetooth ni audífonos.</strong>",
+        readyText: "Listo para grabar",
+        startRecord: "Iniciar Grabación",
+        stopRecord: "Detener y Revisar",
+        labelName: "Tu Nombre *",
+        labelTitle: "Título de la Canción u Historia *",
+        placeholderName: "ej. Abuela Elena",
+        placeholderTitle: "ej. Cielito Lindo",
+        validationMsg: "Por favor completa tu nombre y el título antes de enviar.",
+        uploading: "Enviando al Dropbox de Alice...",
+        sendBtn: "Enviar a Alice",
+        recordAnother: "Grabar Otra Canción o Historia",
+        successTitle: "¡Grabación Enviada!",
+        successMsg: "Muchas gracias por capturar este hermoso recuerdo para Alice.",
+        settingsFooter: "Ajustes de Admin",
+        passcodeTitle: "Acceso de Admin",
+        passcodePrompt: "Ingresa tu código de 4 dígitos para editar los ajustes."
+      }
+    };
+
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = i18n[lang];
+
+      document.getElementById('lang-en').className = lang === 'en' 
+        ? "px-3 py-1.5 rounded-full transition-all bg-rose-600 text-white shadow-sm"
+        : "px-3 py-1.5 rounded-full transition-all text-slate-400 hover:text-white";
+        
+      document.getElementById('lang-es').className = lang === 'es' 
+        ? "px-3 py-1.5 rounded-full transition-all bg-rose-600 text-white shadow-sm"
+        : "px-3 py-1.5 rounded-full transition-all text-slate-400 hover:text-white";
+
+      document.getElementById('ui-title').innerText = t.title;
+      document.getElementById('ui-subtitle').innerHTML = t.subtitle;
+      document.getElementById('ui-warning').innerHTML = t.warning;
+      document.getElementById('ui-ready-text').innerText = t.readyText;
+      
+      if (!isRecording) {
+        document.getElementById('record-btn-text').innerText = t.startRecord;
+      } else {
+        document.getElementById('record-btn-text').innerText = t.stopRecord;
+      }
+
+      document.getElementById('ui-label-name').innerHTML = `${t.labelName.split('*')[0]} <span class="text-rose-400">*</span>`;
+      document.getElementById('ui-label-title').innerHTML = `${t.labelTitle.split('*')[0]} <span class="text-rose-400">*</span>`;
+      document.getElementById('user-name').placeholder = t.placeholderName;
+      document.getElementById('song-title').placeholder = t.placeholderTitle;
+      document.getElementById('ui-validation-msg').innerText = t.validationMsg;
+      document.getElementById('ui-uploading-text').childNodes[2].nodeValue = " " + t.uploading;
+      document.getElementById('ui-send-btn-text').innerText = t.sendBtn;
+      document.getElementById('ui-record-another-btn').innerText = t.recordAnother;
+      document.getElementById('ui-success-title').innerText = t.successTitle;
+      document.getElementById('ui-success-msg').innerText = t.successMsg;
+      document.getElementById('ui-record-another-success').innerText = t.recordAnother;
+      document.getElementById('ui-settings-footer').innerText = t.settingsFooter;
+      document.getElementById('ui-passcode-title').innerText = t.passcodeTitle;
+      document.getElementById('ui-passcode-prompt').innerText = t.passcodePrompt;
+    }
+
+    // AUDIO RECORDING LOGIC
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+    let isRecording = false;
+    let timerInterval = null;
+    let secondsElapsed = 0;
+
+    let audioCtx, analyser, dataArray, canvasCtx, animationFrameId;
+
+    async function toggleRecording() {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { 
+            echoCancellation: false, 
+            noiseSuppression: false, 
+            autoGainControl: false,
+            sampleRate: 48000
+          } 
+        });
+
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = event => {
+          if (event.data.size > 0) audioChunks.push(event.data);
         };
 
-        // DOM Elements
-        const viewGuest = document.getElementById('guest-view');
-        const viewSettings = document.getElementById('settings-view');
-        const btnToggleSettings = document.getElementById('toggle-settings-btn');
+        mediaRecorder.onstop = async () => {
+          const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          audioBlob = await convertToWav(webmBlob);
+          const audioUrl = URL.createObjectURL(audioBlob);
+          document.getElementById('audio-preview').src = audioUrl;
+          
+          document.getElementById('controls-step-1').classList.add('hidden');
+          document.getElementById('controls-step-2').classList.remove('hidden');
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+
+        // UI Updates for Recording State
+        document.getElementById('record-btn-text').innerText = i18n[currentLang].stopRecord;
+        document.getElementById('record-btn').className = "w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-600/30 recording-pulse";
         
-        const displayTitle = document.getElementById('display-title');
-        const displayInstructions = document.getElementById('display-instructions');
-        
-        const inputSenderName = document.getElementById('sender-name');
-        const inputRecordingTitle = document.getElementById('recording-title');
-        const errorSenderName = document.getElementById('sender-name-error');
-        const errorRecordingTitle = document.getElementById('recording-title-error');
-        
-        const recordControlsContainer = document.getElementById('record-controls-container');
-        const btnRecord = document.getElementById('record-btn');
-        const iconRecord = document.getElementById('record-icon');
-        const labelRecord = document.getElementById('record-btn-label');
-        
-        const canvasVisualizer = document.getElementById('visualizer-canvas');
-        const visualizerPlaceholder = document.getElementById('visualizer-placeholder');
-        const canvasCtx = canvasVisualizer.getContext('2d');
-        
-        const timerDisplay = document.getElementById('recording-timer');
-        const qualityBadge = document.getElementById('quality-badge');
-        
-        const playbackControls = document.getElementById('playback-controls');
-        const audioPreview = document.getElementById('audio-preview');
-        const btnRerecord = document.getElementById('rerecord-btn');
-        const btnSubmit = document.getElementById('submit-btn');
-        
-        const uploadingView = document.getElementById('uploading-view');
-        const progressCircle = document.getElementById('progress-circle');
-        const progressText = document.getElementById('progress-text');
-        const uploadSubtext = document.getElementById('upload-status-subtext');
+        document.getElementById('idle-icon').classList.add('hidden');
+        document.getElementById('visualizer').classList.remove('hidden');
+        document.getElementById('timer-display').classList.remove('hidden');
 
-        const formInputs = document.getElementById('form-inputs');
-        const successView = document.getElementById('success-view');
-        const micError = document.getElementById('mic-error');
-        const micErrorText = document.getElementById('mic-error-text');
-        const btnDownloadFallback = document.getElementById('download-fallback-btn');
-        const btnRecordAnother = document.getElementById('record-another-btn');
+        // Start Timer & Visualizer
+        secondsElapsed = 0;
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+          secondsElapsed++;
+          updateTimerDisplay();
+        }, 1000);
 
-        // Admin inputs & Modal
-        const pinModal = document.getElementById('pin-modal');
-        const pinInput = document.getElementById('pin-input');
-        const pinError = document.getElementById('pin-error');
-        const pinSubmitBtn = document.getElementById('pin-submit-btn');
-        const pinCancelBtn = document.getElementById('pin-cancel-btn');
+        setupVisualizer(stream);
 
-        const inputConfigRecipient = document.getElementById('config-recipient');
-        const inputConfigTitle = document.getElementById('config-title');
-        const inputConfigDropboxToken = document.getElementById('config-dropbox-token');
-        const inputConfigAudioFormat = document.getElementById('config-audio-format');
-        const inputConfigWebhook = document.getElementById('config-webhook');
-        const btnSaveSettings = document.getElementById('save-settings-btn');
+      } catch (err) {
+        alert("Microphone access is required to record audio.");
+        console.error(err);
+      }
+    }
 
-        // Populate Saved Config into Admin Panel
-        inputConfigDropboxToken.value = config.dropboxToken;
-        inputConfigAudioFormat.value = config.audioFormat;
-        inputConfigWebhook.value = config.webhook;
+    function stopRecording() {
+      if (mediaRecorder && isRecording) {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+        isRecording = false;
 
-        // Initialize Lucide Icons
-        lucide.createIcons();
+        clearInterval(timerInterval);
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-        // Canvas Responsive Resize
-        function resizeCanvas() {
-            canvasVisualizer.width = canvasVisualizer.offsetWidth * window.devicePixelRatio;
-            canvasVisualizer.height = canvasVisualizer.offsetHeight * window.devicePixelRatio;
+        document.getElementById('record-btn').className = "w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30";
+      }
+    }
+
+    function updateTimerDisplay() {
+      const mins = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
+      const secs = String(secondsElapsed % 60).padStart(2, '0');
+      document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+    }
+
+    function setupVisualizer(stream) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      analyser.fftSize = 64;
+      const bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+
+      const canvas = document.getElementById('visualizer');
+      canvasCtx = canvas.getContext('2d');
+
+      function draw() {
+        animationFrameId = requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+
+        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = (dataArray[i] / 255) * canvas.height;
+          canvasCtx.fillStyle = `rgb(244, 63, 94)`;
+          canvasCtx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
+          x += barWidth;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+      }
+      draw();
+    }
 
-        // Security PIN Prompt Logic
-        btnToggleSettings.addEventListener('click', () => {
-            const isSettingsHidden = viewSettings.classList.contains('hidden');
-            if (isSettingsHidden) {
-                pinInput.value = '';
-                pinError.classList.add('hidden');
-                pinModal.classList.remove('hidden');
-                pinInput.focus();
-            } else {
-                viewSettings.classList.add('hidden');
-            }
-        });
+    // WAV ENCODER
+    async function convertToWav(blob) {
+      const arrayBuffer = await blob.arrayBuffer();
+      const tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const audioBuffer = await tempAudioCtx.decodeAudioData(arrayBuffer);
+      return bufferToWave(audioBuffer, audioBuffer.length);
+    }
 
-        pinCancelBtn.addEventListener('click', () => {
-            pinModal.classList.add('hidden');
-        });
+    function bufferToWave(abuffer, len) {
+      const numOfChan = abuffer.numberOfChannels;
+      const length = len * numOfChan * 2 + 44;
+      const buffer = new ArrayBuffer(length);
+      const view = new DataView(buffer);
+      const channels = [];
+      let sample;
+      let offset = 0;
+      let pos = 0;
 
-        function verifyPin() {
-            if (pinInput.value.trim() === ADMIN_PIN) {
-                pinModal.classList.add('hidden');
-                viewSettings.classList.remove('hidden');
-                viewSettings.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                pinError.classList.remove('hidden');
-                pinInput.value = '';
-                pinInput.focus();
-            }
+      function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
+      function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+
+      setUint32(0x46464952); // "RIFF"
+      setUint32(length - 8);
+      setUint32(0x45564157); // "WAVE"
+      setUint32(0x20746d66); // "fmt "
+      setUint32(16);
+      setUint16(1);
+      setUint16(numOfChan);
+      setUint32(abuffer.sampleRate);
+      setUint32(abuffer.sampleRate * 2 * numOfChan);
+      setUint16(numOfChan * 2);
+      setUint16(16);
+      setUint32(0x61746164); // "data"
+      setUint32(length - pos - 4);
+
+      for (let i = 0; i < abuffer.numberOfChannels; i++) {
+        channels.push(abuffer.getChannelData(i));
+      }
+
+      while (offset < len) {
+        for (let i = 0; i < numOfChan; i++) {
+          sample = Math.max(-1, Math.min(1, channels[i][offset]));
+          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
+          view.setInt16(pos, sample, true);
+          pos += 2;
         }
+        offset++;
+      }
 
-        pinSubmitBtn.addEventListener('click', verifyPin);
-        pinInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') verifyPin();
-        });
+      return new Blob([buffer], { type: "audio/wav" });
+    }
 
-        // Save Admin Settings
-        btnSaveSettings.addEventListener('click', () => {
-            config.recipient = inputConfigRecipient.value || 'Alice';
-            config.title = inputConfigTitle.value || 'Record a Story for Alice';
-            config.dropboxToken = inputConfigDropboxToken.value.trim() || DEFAULT_DROPBOX_TOKEN;
-            config.audioFormat = inputConfigAudioFormat.value;
-            config.webhook = inputConfigWebhook.value.trim();
+    // DIRECT DROPBOX BACKGROUND UPLOAD
+    function sendRecording() {
+      const userName = document.getElementById('user-name').value.trim();
+      const songTitle = document.getElementById('song-title').value.trim();
+      const validationError = document.getElementById('validation-error');
 
-            localStorage.setItem('alice_dropbox_token', config.dropboxToken);
-            localStorage.setItem('alice_audio_format', config.audioFormat);
-            localStorage.setItem('alice_webhook', config.webhook);
+      if (!userName || !songTitle) {
+        validationError.classList.remove('hidden');
+        return;
+      }
+      validationError.classList.add('hidden');
 
-            displayTitle.textContent = config.title;
-            qualityBadge.textContent = config.audioFormat === 'wav' ? 'Studio Audio (48kHz WAV)' : 'High Bitrate MP3/AAC';
+      const token = localStorage.getItem('app_dropbox_token') || DEFAULT_DROPBOX_TOKEN;
+      if (!token) {
+        alert("Dropbox Token missing. Please configure it in Admin Settings.");
+        return;
+      }
 
-            viewSettings.classList.add('hidden');
-        });
+      const sanitize = str => str.replace(/[^a-zA-Z0-9 -]/g, '').trim();
+      const fileName = `${sanitize(userName)} - ${sanitize(songTitle)}.wav`;
 
-        // Helper: Convert AudioBuffer to Uncompressed WAV PCM Blob
-        function bufferToWave(abuffer, len) {
-            let numOfChan = abuffer.numberOfChannels,
-                length = len * numOfChan * 2 + 44,
-                outBuffer = new ArrayBuffer(length),
-                view = new DataView(outBuffer),
-                channels = [], i, sample,
-                offset = 0,
-                pos = 0;
+      document.getElementById('upload-progress-container').classList.remove('hidden');
+      document.getElementById('send-btn').disabled = true;
 
-            function setUint16(data) { view.setUint16(pos, data, true); pos += 2; }
-            function setUint32(data) { view.setUint32(pos, data, true); pos += 4; }
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://content.dropboxapi.com/2/files/upload');
+      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+      xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify({
+        path: '/' + fileName,
+        mode: 'add',
+        autorename: true,
+        mute: false
+      }));
 
-            // WAV Header
-            setUint32(0x46464952);                         // "RIFF"
-            setUint32(length - 8);                          // file length - 8
-            setUint32(0x45564157);                         // "WAVE"
-            setUint32(0x20746d66);                         // "fmt " chunk
-            setUint32(16);                                 // length = 16
-            setUint16(1);                                  // PCM (uncompressed)
-            setUint16(numOfChan);                          // channels count
-            setUint32(abuffer.sampleRate);                 // sample rate
-            setUint32(abuffer.sampleRate * 2 * numOfChan); // byte rate
-            setUint16(numOfChan * 2);                      // block align
-            setUint16(16);                                 // bits per sample
-            setUint32(0x61746164);                         // "data" chunk
-            setUint32(length - pos - 4);                   // chunk length
-
-            for (i = 0; i < abuffer.numberOfChannels; i++) {
-                channels.push(abuffer.getChannelData(i));
-            }
-
-            while (offset < len) {
-                for (i = 0; i < numOfChan; i++) {
-                    sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                    sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-                    view.setInt16(pos, sample, true);
-                    pos += 2;
-                }
-                offset++;
-            }
-
-            return new Blob([outBuffer], { type: 'audio/wav' });
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          document.getElementById('upload-progress-bar').style.width = percent + '%';
+          document.getElementById('upload-percentage').innerText = percent + '%';
         }
+      };
 
-        // Setup Microphone & Media Recording
-        async function startRecording() {
-            micError.classList.add('hidden');
-            audioChunks = [];
-
-            try {
-                microphoneStream = await navigator.mediaDevices.getUserMedia({
-                    audio: {
-                        echoCancellation: false,
-                        noiseSuppression: false,
-                        autoGainControl: true,
-                        sampleRate: 48000
-                    }
-                });
-
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(microphoneStream);
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 64;
-                source.connect(analyser);
-
-                let options = {};
-                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                    options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: 256000 };
-                }
-
-                mediaRecorder = new MediaRecorder(microphoneStream, options);
-
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) {
-                        audioChunks.push(event.data);
-                    }
-                };
-
-                mediaRecorder.onstop = async () => {
-                    const rawBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-                    
-                    if (config.audioFormat === 'wav') {
-                        try {
-                            const arrayBuffer = await rawBlob.arrayBuffer();
-                            const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                            audioBlob = bufferToWave(decodedBuffer, decodedBuffer.length);
-                        } catch (e) {
-                            console.warn("Falling back to raw container format", e);
-                            audioBlob = rawBlob;
-                        }
-                    } else {
-                        audioBlob = rawBlob;
-                    }
-
-                    audioUrl = URL.createObjectURL(audioBlob);
-                    audioPreview.src = audioUrl;
-
-                    playbackControls.classList.remove('hidden');
-                    formInputs.classList.add('hidden');
-                    visualizerPlaceholder.classList.remove('hidden');
-                };
-
-                mediaRecorder.start(100);
-                isRecording = true;
-
-                btnRecord.classList.remove('bg-rose-600', 'hover:bg-rose-500');
-                btnRecord.classList.add('bg-slate-900', 'hover:bg-slate-800', 'pulse-ring');
-                iconRecord.setAttribute('data-lucide', 'square');
-                lucide.createIcons();
-                labelRecord.textContent = 'Tap to Stop';
-                visualizerPlaceholder.classList.add('hidden');
-
-                recordingSeconds = 0;
-                timerDisplay.textContent = '00:00';
-                timerInterval = setInterval(() => {
-                    recordingSeconds++;
-                    const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
-                    const secs = String(recordingSeconds % 60).padStart(2, '0');
-                    timerDisplay.textContent = `${mins}:${secs}`;
-                }, 1000);
-
-                drawVisualizer();
-
-            } catch (err) {
-                console.error("Microphone access error:", err);
-                micError.classList.remove('hidden');
-                micErrorText.textContent = "Could not access microphone. Please allow microphone permissions in your browser settings.";
-            }
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          document.getElementById('controls-step-2').classList.add('hidden');
+          document.getElementById('controls-step-3').classList.remove('hidden');
+        } else {
+          alert('Upload failed. Please check your network or Dropbox token.');
+          document.getElementById('send-btn').disabled = false;
         }
+      };
 
-        function stopRecording() {
-            if (mediaRecorder && isRecording) {
-                mediaRecorder.stop();
-                microphoneStream.getTracks().forEach(track => track.stop());
-                clearInterval(timerInterval);
-                cancelAnimationFrame(animFrameId);
-                isRecording = false;
+      xhr.send(audioBlob);
+    }
 
-                btnRecord.classList.remove('bg-slate-900', 'hover:bg-slate-800', 'pulse-ring');
-                btnRecord.classList.add('bg-rose-600', 'hover:bg-rose-500');
-                iconRecord.setAttribute('data-lucide', 'mic');
-                lucide.createIcons();
-                labelRecord.textContent = 'Tap to Record';
-            }
-        }
+    function resetApp() {
+      document.getElementById('user-name').value = '';
+      document.getElementById('song-title').value = '';
+      document.getElementById('upload-progress-container').classList.add('hidden');
+      document.getElementById('upload-progress-bar').style.width = '0%';
+      document.getElementById('upload-percentage').innerText = '0%';
+      document.getElementById('send-btn').disabled = false;
 
-        function drawVisualizer() {
-            if (!isRecording || !analyser) return;
+      document.getElementById('controls-step-2').classList.add('hidden');
+      document.getElementById('controls-step-3').classList.add('hidden');
+      document.getElementById('controls-step-1').classList.remove('hidden');
 
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
+      document.getElementById('visualizer').classList.add('hidden');
+      document.getElementById('timer-display').classList.add('hidden');
+      document.getElementById('idle-icon').classList.remove('hidden');
+      document.getElementById('record-btn-text').innerText = i18n[currentLang].startRecord;
+    }
 
-            const width = canvasVisualizer.width;
-            const height = canvasVisualizer.height;
+    // PASSCODE & SETTINGS LOGIC
+    function openPasscodeModal() {
+      document.getElementById('passcode-input').value = '';
+      document.getElementById('passcode-error').classList.add('hidden');
+      document.getElementById('passcode-modal').classList.remove('hidden');
+    }
 
-            canvasCtx.clearRect(0, 0, width, height);
+    function closePasscodeModal() {
+      document.getElementById('passcode-modal').classList.add('hidden');
+    }
 
-            const barWidth = (width / bufferLength) * 1.5;
-            let barX = 0;
+    function verifyPasscode() {
+      const code = document.getElementById('passcode-input').value;
+      if (code === '4859') {
+        closePasscodeModal();
+        openSettingsModal();
+      } else {
+        document.getElementById('passcode-error').classList.remove('hidden');
+      }
+    }
 
-            for (let i = 0; i < bufferLength; i++) {
-                const barHeight = (dataArray[i] / 255) * height * 0.8;
-                canvasCtx.fillStyle = '#f43f5e';
-                canvasCtx.beginPath();
-                canvasCtx.roundRect(barX, (height - barHeight) / 2, barWidth - 2, Math.max(barHeight, 4), 4);
-                canvasCtx.fill();
-                barX += barWidth + 2;
-            }
+    function openSettingsModal() {
+      document.getElementById('dropbox-token-input').value = localStorage.getItem('app_dropbox_token') || DEFAULT_DROPBOX_TOKEN;
+      document.getElementById('settings-modal').classList.remove('hidden');
+    }
 
-            animFrameId = requestAnimationFrame(drawVisualizer);
-        }
+    function closeSettingsModal() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    }
 
-        btnRecord.addEventListener('click', () => {
-            if (!isRecording) startRecording();
-            else stopRecording();
-        });
+    function saveSettings() {
+      const token = document.getElementById('dropbox-token-input').value.trim();
+      localStorage.setItem('app_dropbox_token', token);
+      closeSettingsModal();
+      alert('Settings saved!');
+    }
 
-        btnRerecord.addEventListener('click', () => {
-            playbackControls.classList.add('hidden');
-            formInputs.classList.remove('hidden');
-            audioBlob = null;
-            audioUrl = null;
-            timerDisplay.textContent = '00:00';
-            canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
-        });
-
-        function sanitizeFilename(str) {
-            return str
-                .trim()
-                .replace(/[/\\?%*:|"<>]/g, '')
-                .replace(/\s+/g, ' ');
-        }
-
-        function validateInputs() {
-            let isValid = true;
-            const senderNameVal = inputSenderName.value.trim();
-            const recordingTitleVal = inputRecordingTitle.value.trim();
-
-            if (!senderNameVal) {
-                inputSenderName.classList.add('border-rose-500', 'bg-rose-50/30');
-                errorSenderName.classList.remove('hidden');
-                isValid = false;
-            } else {
-                inputSenderName.classList.remove('border-rose-500', 'bg-rose-50/30');
-                errorSenderName.classList.add('hidden');
-            }
-
-            if (!recordingTitleVal) {
-                inputRecordingTitle.classList.add('border-rose-500', 'bg-rose-50/30');
-                errorRecordingTitle.classList.remove('hidden');
-                isValid = false;
-            } else {
-                inputRecordingTitle.classList.remove('border-rose-500', 'bg-rose-50/30');
-                errorRecordingTitle.classList.add('hidden');
-            }
-
-            return isValid;
-        }
-
-        inputSenderName.addEventListener('input', () => {
-            if (inputSenderName.value.trim()) {
-                inputSenderName.classList.remove('border-rose-500', 'bg-rose-50/30');
-                errorSenderName.classList.add('hidden');
-            }
-        });
-
-        inputRecordingTitle.addEventListener('input', () => {
-            if (inputRecordingTitle.value.trim()) {
-                inputRecordingTitle.classList.remove('border-rose-500', 'bg-rose-50/30');
-                errorRecordingTitle.classList.add('hidden');
-            }
-        });
-
-        function setUploadProgress(percent) {
-            progressText.textContent = `${Math.round(percent)}%`;
-            progressCircle.setAttribute('stroke-dasharray', `${percent}, 100`);
-        }
-
-        function uploadToDropboxDirect(fileBlob, fileName) {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                
-                xhr.upload.addEventListener('progress', (e) => {
-                    if (e.lengthComputable) {
-                        const percentComplete = (e.loaded / e.total) * 100;
-                        setUploadProgress(percentComplete);
-                    }
-                });
-
-                xhr.addEventListener('load', () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve(JSON.parse(xhr.responseText));
-                    } else {
-                        reject(new Error(`Dropbox Upload Failed (${xhr.status}): ${xhr.responseText}`));
-                    }
-                });
-
-                xhr.addEventListener('error', () => reject(new Error('Network error during upload.')));
-
-                xhr.open('POST', 'https://content.dropboxapi.com/2/files/upload');
-                xhr.setRequestHeader('Authorization', `Bearer ${config.dropboxToken}`);
-                xhr.setRequestHeader('Content-Type', 'application/octet-stream');
-                
-                const dropboxArgs = {
-                    path: `/${fileName}`,
-                    mode: 'add',
-                    autorename: true,
-                    mute: false,
-                    strict_conflict: false
-                };
-                xhr.setRequestHeader('Dropbox-API-Arg', JSON.stringify(dropboxArgs));
-
-                xhr.send(fileBlob);
-            });
-        }
-
-        btnSubmit.addEventListener('click', async () => {
-            if (!validateInputs()) {
-                formInputs.classList.remove('hidden');
-                formInputs.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-
-            const senderName = sanitizeFilename(inputSenderName.value);
-            const recordTitle = sanitizeFilename(inputRecordingTitle.value);
-            const fileExt = config.audioFormat === 'wav' ? 'wav' : 'mp3';
-            
-            const fileName = `${senderName} - ${recordTitle}.${fileExt}`;
-
-            if (!audioBlob) return;
-
-            recordControlsContainer.classList.add('hidden');
-            playbackControls.classList.add('hidden');
-            uploadingView.classList.remove('hidden');
-            setUploadProgress(5);
-
-            let uploadSuccess = false;
-
-            if (config.dropboxToken) {
-                try {
-                    uploadSubtext.textContent = "Uploading directly to Alice's Dropbox...";
-                    await uploadToDropboxDirect(audioBlob, fileName);
-                    uploadSuccess = true;
-                } catch (err) {
-                    console.error("Dropbox direct upload failed:", err);
-                }
-            }
-
-            if (!uploadSuccess && config.webhook) {
-                try {
-                    uploadSubtext.textContent = "Sending via backup server...";
-                    setUploadProgress(50);
-                    const formData = new FormData();
-                    formData.append('audio', audioBlob, fileName);
-                    formData.append('senderName', senderName);
-                    formData.append('recordingTitle', recordTitle);
-
-                    await fetch(config.webhook, { method: 'POST', body: formData });
-                    uploadSuccess = true;
-                    setUploadProgress(100);
-                } catch (err) {
-                    console.warn("Webhook upload failed:", err);
-                }
-            }
-
-            if (!config.dropboxToken && !config.webhook) {
-                triggerLocalDownload(fileName);
-            }
-
-            uploadingView.classList.add('hidden');
-            formInputs.classList.add('hidden');
-            successView.classList.remove('hidden');
-        });
-
-        function triggerLocalDownload(fileName) {
-            if (!audioUrl) return;
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = audioUrl;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        btnDownloadFallback.addEventListener('click', () => {
-            const senderName = sanitizeFilename(inputSenderName.value) || 'FamilyMember';
-            const recordTitle = sanitizeFilename(inputRecordingTitle.value) || 'Story';
-            const fileExt = config.audioFormat === 'wav' ? 'wav' : 'mp3';
-            const fileName = `${senderName} - ${recordTitle}.${fileExt}`;
-            triggerLocalDownload(fileName);
-        });
-
-        btnRecordAnother.addEventListener('click', () => {
-            successView.classList.add('hidden');
-            formInputs.classList.remove('hidden');
-            recordControlsContainer.classList.remove('hidden');
-            
-            inputRecordingTitle.value = '';
-            
-            audioBlob = null;
-            audioUrl = null;
-            timerDisplay.textContent = '00:00';
-            canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
-        });
-    </script>
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      setLanguage('en');
+    });
+  </script>
 </body>
 </html>
