@@ -249,8 +249,8 @@
         <div>
           <label class="block font-semibold text-slate-300 mb-1">Audio Format & Quality</label>
           <select id="audio-format-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-rose-500">
-            <option value="wav">WAV — Uncompressed Lossless (44.1 kHz)</option>
-            <option value="m4a">AAC / M4A — Compressed High Quality (Smaller File Size)</option>
+            <option value="m4a">AAC / M4A — Compressed High Quality (Default - Smaller File Size)</option>
+            <option value="wav">WAV — Uncompressed Lossless (48 kHz Studio Quality)</option>
           </select>
         </div>
 
@@ -426,8 +426,8 @@
 
     async function startRecording() {
       try {
-        const formatSetting = localStorage.getItem('app_audio_format') || 'wav';
-        const sampleRate = 44100; // Capped at 44.1 kHz
+        const formatSetting = localStorage.getItem('app_audio_format') || 'm4a';
+        const sampleRate = 48000;
 
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: { 
@@ -459,7 +459,7 @@
           const rawBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
           
           if (formatSetting === 'wav') {
-            audioBlob = await convertToWav(rawBlob, 44100);
+            audioBlob = await convertToWav(rawBlob, 48000);
           } else {
             audioBlob = rawBlob;
           }
@@ -548,8 +548,8 @@
       draw();
     }
 
-    // WAV ENCODER (CAPPED AT 44.1 kHz)
-    async function convertToWav(blob, targetSampleRate = 44100) {
+    // WAV ENCODER (48 kHz)
+    async function convertToWav(blob, targetSampleRate = 48000) {
       const arrayBuffer = await blob.arrayBuffer();
       const tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: targetSampleRate });
       const audioBuffer = await tempAudioCtx.decodeAudioData(arrayBuffer);
@@ -604,7 +604,7 @@
     function getFormattedFileName() {
       const userName = document.getElementById('user-name').value.trim();
       const songTitle = document.getElementById('song-title').value.trim();
-      const formatSetting = localStorage.getItem('app_audio_format') || 'wav';
+      const formatSetting = localStorage.getItem('app_audio_format') || 'm4a';
       const ext = formatSetting === 'wav' ? 'wav' : 'm4a';
       const sanitize = str => str.replace(/[^a-zA-Z0-9 -]/g, '').trim();
       return `${sanitize(userName)} - ${sanitize(songTitle)}.${ext}`;
@@ -735,7 +735,7 @@
 
     function openSettingsModal() {
       document.getElementById('dropbox-token-input').value = localStorage.getItem('app_dropbox_token') || DEFAULT_DROPBOX_TOKEN;
-      document.getElementById('audio-format-select').value = localStorage.getItem('app_audio_format') || 'wav';
+      document.getElementById('audio-format-select').value = localStorage.getItem('app_audio_format') || 'm4a';
       document.getElementById('settings-modal').classList.remove('hidden');
     }
 
