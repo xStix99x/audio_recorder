@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Keepsakes for Alice</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.5);
+            animation: pulse-ring 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse-ring {
+            to { box-shadow: 0 0 0 20px rgba(225, 29, 72, 0); }
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between text-slate-800 antialiased selection:bg-rose-100 selection:text-rose-600">
+
+    <!-- Top Bar Navigation (Admin Toggle) -->
+    <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-full bg-rose-500 flex items-center justify-center text-white shadow-md">
+                <i data-lucide="mic" class="w-5 h-5"></i>
+            </div>
+            <span class="font-bold text-lg tracking-tight text-slate-800" id="header-brand">Keepsakes for Alice</span>
+        </div>
+        <button id="toggle-settings-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-white text-slate-600 border border-slate-200 shadow-sm hover:bg-slate-50 transition-all">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span id="settings-btn-text">Dropbox & Setup</span>
+        </button>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow flex items-center justify-center p-4 md:p-6">
+        <div class="w-full max-w-lg bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden transition-all duration-300">
+            
+            <!-- ================= GUEST RECORDING VIEW ================= -->
+            <div id="guest-view" class="p-6 md:p-8 flex flex-col gap-6">
+                
+                <!-- Warm Welcome Header -->
+                <div class="text-center space-y-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-600 border border-rose-100">
+                        <i data-lucide="heart" class="w-3.5 h-3.5 mr-1 fill-rose-500"></i> Audio Memory for Alice
+                    </span>
+                    <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900" id="display-title">
+                        Record a Story or Song for Alice
+                    </h1>
+                    <p class="text-slate-500 text-sm md:text-base max-w-sm mx-auto" id="display-instructions">
+                        Sing a lullaby, tell a favourite story, or leave a warm message. We capture studio-quality audio so Alice can cherish your voice forever.
+                    </p>
+                </div>
+
+                <!-- Input Details Form -->
+                <div id="form-inputs" class="space-y-4">
+                    <div>
+                        <label for="sender-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Your Name *</label>
+                        <input type="text" id="sender-name" placeholder="e.g. Grandma Helen / Uncle David" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
+                    </div>
+                    <div>
+                        <label for="recording-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Song / Story Title (Optional)</label>
+                        <input type="text" id="recording-title" placeholder="e.g. Bedtime Lullaby & Wishes" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
+                    </div>
+                </div>
+
+                <!-- Microphone Permission Error Callout -->
+                <div id="mic-error" class="hidden p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm space-y-2">
+                    <div class="flex items-center gap-2 font-semibold text-amber-900">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600"></i>
+                        Microphone Access Blocked
+                    </div>
+                    <p id="mic-error-text">Please allow microphone access in your browser settings to record your voice memory.</p>
+                </div>
+
+                <!-- Visualizer & Audio Status -->
+                <div class="flex flex-col items-center justify-center space-y-3 pt-1">
+                    <!-- Canvas Waveform Visualizer -->
+                    <div class="w-full h-20 bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden relative flex items-center justify-center">
+                        <canvas id="visualizer-canvas" class="w-full h-full block"></canvas>
+                        <div id="visualizer-placeholder" class="absolute inset-0 flex items-center justify-center text-xs text-slate-400 font-medium">
+                            <i data-lucide="activity" class="w-4 h-4 mr-1.5 opacity-60"></i> Ready to record
+                        </div>
+                    </div>
+
+                    <!-- Recording Timer & Quality Tag -->
+                    <div class="flex items-center gap-3 text-xs font-mono">
+                        <div id="recording-timer" class="font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                            00:00
+                        </div>
+                        <span id="quality-badge" class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-medium text-[10px] uppercase tracking-wider">
+                            Studio Audio (48kHz)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- IMPORTANT NOTICE NEAR RECORD BUTTON -->
+                <div class="bg-amber-50/80 border border-amber-200 rounded-2xl p-3.5 text-amber-900 text-xs text-center space-y-1">
+                    <p class="font-bold text-amber-950 flex items-center justify-center gap-1.5">
+                        <i data-lucide="volume-2" class="w-4 h-4 text-amber-600"></i>
+                        For the best audio quality:
+                    </p>
+                    <p class="font-bold">
+                        Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.
+                    </p>
+                </div>
+
+                <!-- Primary Action Buttons -->
+                <div class="flex flex-col items-center gap-3">
+                    <!-- Giant Record/Stop Button -->
+                    <button id="record-btn" class="w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-500 active:scale-95 text-white flex items-center justify-center shadow-lg shadow-rose-200 transition-all cursor-pointer">
+                        <i data-lucide="mic" id="record-icon" class="w-9 h-9"></i>
+                    </button>
+                    <span id="record-btn-label" class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tap to Record</span>
+
+                    <!-- Playback & Re-record Controls (Shown after stop) -->
+                    <div id="playback-controls" class="hidden w-full flex-col items-center gap-3 pt-2">
+                        <audio id="audio-preview" controls class="w-full rounded-xl"></audio>
+                        <div class="flex w-full gap-3">
+                            <button id="rerecord-btn" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-slate-600 font-medium text-sm hover:bg-slate-50 transition flex items-center justify-center gap-2">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Re-record
+                            </button>
+                            <button id="submit-btn" class="flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm transition shadow-md flex items-center justify-center gap-2">
+                                <i data-lucide="send" class="w-4 h-4"></i> Send to Alice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Success Confirmation View -->
+                <div id="success-view" class="hidden text-center py-6 space-y-4">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                        <i data-lucide="check-circle" class="w-10 h-10"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h2 class="text-xl font-bold text-slate-900">Thank You!</h2>
+                        <p class="text-sm text-slate-500 max-w-xs mx-auto" id="success-message">
+                            Your voice keepsake for Alice has been saved!
+                        </p>
+                    </div>
+                    <div class="pt-4 flex flex-col gap-2">
+                        <a id="dropbox-direct-link-btn" href="#" target="_blank" class="hidden w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white font-medium text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
+                            <i data-lucide="upload-cloud" class="w-4 h-4"></i> Send File to Dropbox Folder
+                        </a>
+                        <button id="download-fallback-btn" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm rounded-xl transition flex items-center justify-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Save Local Copy
+                        </button>
+                        <button id="record-another-btn" class="text-xs font-semibold text-rose-600 hover:text-rose-700 py-2">
+                            + Record Another Song or Story
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ================= ADMIN & DROPBOX SETTINGS PANEL ================= -->
+            <div id="settings-view" class="hidden p-6 md:p-8 space-y-6 bg-slate-50/50 border-t border-slate-100">
+                <div class="flex items-center justify-between border-b border-slate-200 pb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Dropbox & Settings</h2>
+                        <p class="text-xs text-slate-500">How to deliver recordings directly to your Dropbox</p>
+                    </div>
+                    <span class="p-2 bg-slate-200 rounded-lg text-slate-600">
+                        <i data-lucide="sliders" class="w-5 h-5"></i>
+                    </span>
+                </div>
+
+                <!-- Explanation Box: Dropbox Delivery Options -->
+                <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-xs text-blue-900 space-y-3">
+                    <div class="flex items-center gap-2 font-bold text-blue-950 text-sm">
+                        <i data-lucide="folder-plus" class="w-4 h-4 text-blue-600"></i>
+                        Direct Dropbox Folder Delivery
+                    </div>
+                    <p class="leading-relaxed">
+                        Yes! You can automatically receive recordings in your Dropbox folder using one of two easy options:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-2 font-medium text-blue-900">
+                        <li>
+                            <strong class="text-blue-950">Dropbox File Request (Easiest - Recommended):</strong> Create a <i>Dropbox File Request</i> in your Dropbox account. Paste the link below. When relatives finish recording, they click "Upload to Dropbox" and it lands right in your folder.
+                        </li>
+                        <li>
+                            <strong class="text-blue-950">Automated Webhook (Make / Zapier):</strong> Connect a Webhook URL from Make or Zapier that instantly saves incoming audio files directly to your Dropbox root folder behind the scenes.
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Dropbox Settings Fields -->
+                <div class="space-y-4 pt-1">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+                            Dropbox File Request Link
+                        </label>
+                        <input type="url" id="config-dropbox-link" placeholder="https://www.dropbox.com/request/..." value="" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <p class="text-[11px] text-slate-400 mt-1">Found under Dropbox &gt; File Requests &gt; Create Request.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">
+                            Automated Upload Webhook URL (Optional)
+                        </label>
+                        <input type="url" id="config-webhook" placeholder="https://hook.make.com/..." class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm placeholder-slate-400 focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Content Configuration -->
+                <div class="space-y-4 pt-3 border-t border-slate-200">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Text Customization</h3>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Recipient Name</label>
+                        <input type="text" id="config-recipient" value="Alice" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Header Title</label>
+                        <input type="text" id="config-title" value="Record a Story or Song for Alice" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Instructions Text</label>
+                        <textarea id="config-instructions" rows="2" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">Sing a lullaby, tell a favourite story, or leave a warm message. We capture studio-quality audio so Alice can cherish your voice forever.</textarea>
+                    </div>
+                </div>
+
+                <!-- Audio Quality Config -->
+                <div class="space-y-3 pt-3 border-t border-slate-200">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-600">Audio Format Target</h3>
+                    <select id="config-quality" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm bg-white">
+                        <option value="256000">Studio Uncompressed/High-Opus (256 kbps, 48 kHz)</option>
+                        <option value="128000">Standard High Quality (128 kbps)</option>
+                    </select>
+                </div>
+
+                <!-- Save Button -->
+                <button id="save-settings-btn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-sm transition">
+                    Save Configuration & Close
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-4xl mx-auto p-4 text-center text-xs text-slate-400">
+        Voice Keepsakes for Alice &bull; Direct Studio Audio Capture
+    </footer>
+
+    <!-- JavaScript App Logic -->
+    <script>
+        // Global State & Settings
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let audioBlob = null;
+        let audioUrl = null;
+        let audioContext = null;
+        let analyser = null;
+        let microphoneStream = null;
+        let animFrameId = null;
+        let timerInterval = null;
+        let recordingSeconds = 0;
+        let isRecording = false;
+
+        // Config defaults for Alice
+        let config = {
+            recipient: 'Alice',
+            title: 'Record a Story or Song for Alice',
+            instructions: 'Sing a lullaby, tell a favourite story, or leave a warm message. We capture studio-quality audio so Alice can cherish your voice forever.',
+            webhook: '',
+            dropboxLink: '',
+            bitrate: 256000
+        };
+
+        // DOM Elements
+        const viewGuest = document.getElementById('guest-view');
+        const viewSettings = document.getElementById('settings-view');
+        const btnToggleSettings = document.getElementById('toggle-settings-btn');
+        const btnSettingsText = document.getElementById('settings-btn-text');
+        
+        const displayTitle = document.getElementById('display-title');
+        const displayInstructions = document.getElementById('display-instructions');
+        
+        const btnRecord = document.getElementById('record-btn');
+        const iconRecord = document.getElementById('record-icon');
+        const labelRecord = document.getElementById('record-btn-label');
+        
+        const canvasVisualizer = document.getElementById('visualizer-canvas');
+        const visualizerPlaceholder = document.getElementById('visualizer-placeholder');
+        const canvasCtx = canvasVisualizer.getContext('2d');
+        
+        const timerDisplay = document.getElementById('recording-timer');
+        const qualityBadge = document.getElementById('quality-badge');
+        
+        const playbackControls = document.getElementById('playback-controls');
+        const audioPreview = document.getElementById('audio-preview');
+        const btnRerecord = document.getElementById('rerecord-btn');
+        const btnSubmit = document.getElementById('submit-btn');
+        
+        const formInputs = document.getElementById('form-inputs');
+        const successView = document.getElementById('success-view');
+        const micError = document.getElementById('mic-error');
+        const micErrorText = document.getElementById('mic-error-text');
+        const btnDownloadFallback = document.getElementById('download-fallback-btn');
+        const btnDropboxDirect = document.getElementById('dropbox-direct-link-btn');
+        const btnRecordAnother = document.getElementById('record-another-btn');
+
+        // Admin inputs
+        const inputConfigRecipient = document.getElementById('config-recipient');
+        const inputConfigTitle = document.getElementById('config-title');
+        const inputConfigInstructions = document.getElementById('config-instructions');
+        const inputConfigWebhook = document.getElementById('config-webhook');
+        const inputConfigDropbox = document.getElementById('config-dropbox-link');
+        const inputConfigQuality = document.getElementById('config-quality');
+        const btnSaveSettings = document.getElementById('save-settings-btn');
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Canvas Responsive Resize
+        function resizeCanvas() {
+            canvasVisualizer.width = canvasVisualizer.offsetWidth * window.devicePixelRatio;
+            canvasVisualizer.height = canvasVisualizer.offsetHeight * window.devicePixelRatio;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Toggle Settings Panel View
+        btnToggleSettings.addEventListener('click', () => {
+            const isSettingsHidden = viewSettings.classList.contains('hidden');
+            if (isSettingsHidden) {
+                viewSettings.classList.remove('hidden');
+                btnSettingsText.textContent = 'Close Settings';
+            } else {
+                viewSettings.classList.add('hidden');
+                btnSettingsText.textContent = 'Dropbox & Setup';
+            }
+        });
+
+        // Save Admin Settings
+        btnSaveSettings.addEventListener('click', () => {
+            config.recipient = inputConfigRecipient.value || 'Alice';
+            config.title = inputConfigTitle.value || 'Record a Story for Alice';
+            config.instructions = inputConfigInstructions.value || '';
+            config.webhook = inputConfigWebhook.value.trim();
+            config.dropboxLink = inputConfigDropbox.value.trim();
+            config.bitrate = inputConfigQuality.value;
+
+            displayTitle.textContent = config.title;
+            displayInstructions.textContent = config.instructions;
+
+            viewSettings.classList.add('hidden');
+            btnSettingsText.textContent = 'Dropbox & Setup';
+        });
+
+        // Setup MediaRecorder for High Fidelity Audio
+        async function startRecording() {
+            micError.classList.add('hidden');
+            audioChunks = [];
+
+            try {
+                // Request highest resolution sample rate from microphone, disable telecommunication noise reduction
+                microphoneStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: true,
+                        sampleRate: 48000
+                    }
+                });
+
+                // Set up Web Audio API Visualizer
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(microphoneStream);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 64;
+                source.connect(analyser);
+
+                // Determine supported high quality MIME type
+                let options = {};
+                if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                    options = { mimeType: 'audio/webm;codecs=opus', audioBitsPerSecond: parseInt(config.bitrate) || 256000 };
+                } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                    options = { mimeType: 'audio/mp4', audioBitsPerSecond: parseInt(config.bitrate) || 256000 };
+                }
+
+                mediaRecorder = new MediaRecorder(microphoneStream, options);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                    audioUrl = URL.createObjectURL(audioBlob);
+                    audioPreview.src = audioUrl;
+
+                    // Display playback controls
+                    playbackControls.classList.remove('hidden');
+                    formInputs.classList.add('hidden');
+                    visualizerPlaceholder.classList.remove('hidden');
+                };
+
+                mediaRecorder.start(100);
+                isRecording = true;
+
+                // Update UI for recording state
+                btnRecord.classList.remove('bg-rose-600', 'hover:bg-rose-500');
+                btnRecord.classList.add('bg-slate-900', 'hover:bg-slate-800', 'pulse-ring');
+                iconRecord.setAttribute('data-lucide', 'square');
+                lucide.createIcons();
+                labelRecord.textContent = 'Tap to Stop';
+                visualizerPlaceholder.classList.add('hidden');
+
+                // Start Timer
+                recordingSeconds = 0;
+                timerDisplay.textContent = '00:00';
+                timerInterval = setInterval(() => {
+                    recordingSeconds++;
+                    const mins = String(Math.floor(recordingSeconds / 60)).padStart(2, '0');
+                    const secs = String(recordingSeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = `${mins}:${secs}`;
+                }, 1000);
+
+                // Start Visualizer Loop
+                drawVisualizer();
+
+            } catch (err) {
+                console.error("Microphone access error:", err);
+                micError.classList.remove('hidden');
+                micErrorText.textContent = "Could not access microphone. Please allow microphone permissions in your phone browser settings.";
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                microphoneStream.getTracks().forEach(track => track.stop());
+                clearInterval(timerInterval);
+                cancelAnimationFrame(animFrameId);
+                isRecording = false;
+
+                // Reset record button styling
+                btnRecord.classList.remove('bg-slate-900', 'hover:bg-slate-800', 'pulse-ring');
+                btnRecord.classList.add('bg-rose-600', 'hover:bg-rose-500');
+                iconRecord.setAttribute('data-lucide', 'mic');
+                lucide.createIcons();
+                labelRecord.textContent = 'Tap to Record';
+            }
+        }
+
+        // Canvas Waveform Visualizer Animation
+        function drawVisualizer() {
+            if (!isRecording || !analyser) return;
+
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            const width = canvasVisualizer.width;
+            const height = canvasVisualizer.height;
+
+            canvasCtx.clearRect(0, 0, width, height);
+
+            const barWidth = (width / bufferLength) * 1.5;
+            let barX = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const barHeight = (dataArray[i] / 255) * height * 0.8;
+
+                canvasCtx.fillStyle = '#f43f5e';
+                canvasCtx.beginPath();
+                canvasCtx.roundRect(
+                    barX, 
+                    (height - barHeight) / 2, 
+                    barWidth - 2, 
+                    Math.max(barHeight, 4), 
+                    4
+                );
+                canvasCtx.fill();
+
+                barX += barWidth + 2;
+            }
+
+            animFrameId = requestAnimationFrame(drawVisualizer);
+        }
+
+        // Toggle Recording Button Listener
+        btnRecord.addEventListener('click', () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        // Re-record Button
+        btnRerecord.addEventListener('click', () => {
+            playbackControls.classList.add('hidden');
+            formInputs.classList.remove('hidden');
+            audioBlob = null;
+            audioUrl = null;
+            timerDisplay.textContent = '00:00';
+            canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
+        });
+
+        // Submit Memory Action
+        btnSubmit.addEventListener('click', async () => {
+            const senderName = document.getElementById('sender-name').value.trim() || 'Family Member';
+            const recordTitle = document.getElementById('recording-title').value.trim() || 'Audio Memory';
+
+            if (!audioBlob) return;
+
+            // Trigger local download automatically so file isn't lost
+            triggerLocalDownload(senderName);
+
+            // Optional Webhook Submission (e.g. Make / Zapier to Dropbox)
+            if (config.webhook) {
+                try {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Sending...`;
+                    lucide.createIcons();
+
+                    const formData = new FormData();
+                    formData.append('audio', audioBlob, `Alice_Story_${senderName.replace(/\s+/g, '_')}_${Date.now()}.webm`);
+                    formData.append('senderName', senderName);
+                    formData.append('recordingTitle', recordTitle);
+
+                    await fetch(config.webhook, { method: 'POST', body: formData });
+                } catch (err) {
+                    console.warn("Webhook submission notice:", err);
+                }
+            }
+
+            // Handle Dropbox File Request Link if configured
+            if (config.dropboxLink) {
+                btnDropboxDirect.href = config.dropboxLink;
+                btnDropboxDirect.classList.remove('hidden');
+            } else {
+                btnDropboxDirect.classList.add('hidden');
+            }
+
+            // Show Success View
+            formInputs.classList.add('hidden');
+            playbackControls.classList.add('hidden');
+            btnRecord.parentElement.classList.add('hidden');
+            successView.classList.remove('hidden');
+        });
+
+        function triggerLocalDownload(senderName) {
+            if (!audioUrl) return;
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = audioUrl;
+            a.download = `Story_for_Alice_from_${senderName.replace(/\s+/g, '_')}.webm`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Local Download Fallback
+        btnDownloadFallback.addEventListener('click', () => {
+            const senderName = document.getElementById('sender-name').value.trim() || 'FamilyMember';
+            triggerLocalDownload(senderName);
+        });
+
+        // Record Another
+        btnRecordAnother.addEventListener('click', () => {
+            successView.classList.add('hidden');
+            formInputs.classList.remove('hidden');
+            btnRecord.parentElement.classList.remove('hidden');
+            audioBlob = null;
+            audioUrl = null;
+            timerDisplay.textContent = '00:00';
+            canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
+        });
+    </script>
+</body>
+</html>
