@@ -75,7 +75,7 @@
             <li id="ui-tip-3">Do not use bluetooth headphones or hearing aids; a dedicated microphone is okay.</li>
           </ol>
           <div class="pt-2 flex justify-center">
-            <img src="https://github.com/xStix99x/sound-capsule/blob/main/Diagram.jpg?raw=true" alt="Recording Distance Diagram" class="rounded-xl border border-slate-700/80 max-h-48 object-contain shadow-md">
+            <img id="diagram-img" src="https://github.com/xStix99x/sound-capsule/blob/main/Diagram.jpg?raw=true" alt="Recording Distance Diagram" class="rounded-xl border border-slate-700/80 max-h-48 object-contain shadow-md">
           </div>
         </div>
       </div>
@@ -276,6 +276,12 @@
     // HARDCODED DROPBOX ACCESS TOKEN
     const DEFAULT_DROPBOX_TOKEN = "sl.u.AG3s7jGfn-krDipw9mgu72api_DWKUGe-U4wGKk97N_D3x14f5XgMUFe3G7ih7bam9nfDKdurxF3c8ObmDRNllpxoRZzzCnpdySemRTxgEMDnEvjimRII-_qmwGORarDlMqSRtGplZ-ml1f7eFcFPvayPhfdHqLjgtoB1A07ZBMDtjOBGHS5_nbhQ3ni8D8kN-HbAAoCkKtG7M2e2Hl9BM9yGEsn1DZlvKzySRpkwPmXjLkuWn7_KwKCEcREsPKd_15WKuasvxnNsUiLDrHcYf5sncbIqEwvsG8bXZszLvXE3cFhtBukc_kWzCk5xgdAkVBcYFMlc7bjDtivgW9SZABd1mluKYDkzremN7mA5N18jPh5YcfNKrl7c3prl37iJU6tV6iXOgV13g59zRFWkiaQnV1f9ZcmO4OYeFa2kYNnnwrpmNeRFIcVEPNgvUeI0zE93vOTaPxz0IgoTXQXcy3fstIYHJ3j9XuEKjcjTC53yOgvAxY0hgbnrvSQnEexR3Qx2IorE9EGsmPieX0juiCUQ-BT1IogbfkdnS0IRJz7TBBX39o_fMiIxf0lJSYnENJlSBYpdmikJDoYboOLFoA2_uSd8WXJ2hEdhCNEhRaX0SPb3Wn6-LAG-Ac9rr_nasWuRV1npv1uvpctngqz5WrkyXy0sLkmhnW1MyQynxobQTbqdC-ci85y5B4WTdUxo_tbJvi1l0WqjoZfj1fHLlC4SrdBmr5iAqvyhZ5qzy-bHdCn0izNLcvQAQeKIbkUduQZlzcoC_Y81PZNP1dfC6g8M24aOcNtWjc4d5y0iFAAsRRVPEJ9tdGmN8gdOV7EcF7b7jPT3g-2u6hzNjPmA5JL1wKV3XG0TUzsbl9WK8BGUkBv23L_d_0C0KmfYm7WyyJRCA_jXTD4vohoizzmfOHDg3qaJkQZW6MIk-0Q339bVCDjbwNhNR7SxLvo89NVpy6jejGNetp4N6HmbNetKE4qfUJSDNR5UTYoMLh7orP5G64BKPVMR0mKGcOSkideKFZ9gEIb0wUATfavsdauVpKL4ASXShe9INHK20VcbdZ_N4dfQ5yYn393VuXUvAx74tMmcCkKkT5CXUEirL2G82B2l6P1QJoxBz7Cz-HRMl2u1wT6Q2b_tPY0__Y9VXr7Xj3Oj0fOe7KsizJxGdaZOW2NuaTab5C733FJSapqE4rqUsuJSr07cD9UZnZqvrxgoUO8mTYSu1jyeiIdRb2xP2v0gjBuNoEPcNw_juBui5H0ROli7fgEjwuueFFFJK-G8H-i1aKgPUwdOgc7xozESV6Oi14j8JUuBFunRXWfB_Vaqkq6QNhGD7iTaJ44TP-PdyPAB0eOAVwfHhz9SkalgCGH";
 
+    // DIAGRAM IMAGE URLS BY LANGUAGE
+    const diagramImages = {
+      en: "https://github.com/xStix99x/sound-capsule/blob/main/Diagram.jpg?raw=true",
+      es: "https://github.com/xStix99x/sound-capsule/blob/main/diagram%20spanish.jpeg?raw=true"
+    };
+
     // TRANSLATIONS DICTIONARY
     const i18n = {
       en: {
@@ -355,6 +361,10 @@
       document.getElementById('ui-tip-1').innerText = t.tip1;
       document.getElementById('ui-tip-2').innerText = t.tip2;
       document.getElementById('ui-tip-3').innerText = t.tip3;
+      
+      // Update diagram image source based on selected language
+      document.getElementById('diagram-img').src = diagramImages[lang];
+
       document.getElementById('ui-ready-text').innerText = t.readyText;
       
       if (!isRecording) {
