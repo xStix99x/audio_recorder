@@ -13,7 +13,7 @@
   <style>
     @keyframes pulse-ring {
       0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.1); opacity: 0.4; }
+      50% { transform: scale(1.08); opacity: 0.4; }
       100% { transform: scale(0.95); opacity: 0.8; }
     }
     .recording-pulse {
@@ -36,7 +36,7 @@
   <div class="max-w-xl w-full mx-auto px-4 py-8 flex-1 flex flex-col justify-between">
     
     <!-- HEADER -->
-    <header class="text-center mt-6 mb-8">
+    <header class="text-center mt-6 mb-6">
       <div class="inline-flex items-center justify-center p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl mb-4 text-rose-400 shadow-inner">
         <i data-lucide="mic" class="w-8 h-8"></i>
       </div>
@@ -57,6 +57,27 @@
         <p id="ui-warning" class="text-xs sm:text-sm text-amber-200/90 leading-relaxed">
           <strong class="font-semibold text-amber-300">Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.</strong>
         </p>
+      </div>
+
+      <!-- COLLAPSIBLE RECORDING TIPS GUIDE -->
+      <div class="bg-slate-900/60 border border-slate-700/70 rounded-2xl overflow-hidden transition-all">
+        <button onclick="toggleTips()" class="w-full p-4 text-left flex items-center justify-between font-bold text-xs sm:text-sm text-slate-200 hover:text-rose-400 transition-colors">
+          <span id="ui-tips-title" class="flex items-center gap-2">
+            <i data-lucide="lightbulb" class="w-4 h-4 text-amber-400"></i>
+            💡 Tips for the Best Recording
+          </span>
+          <i id="tips-chevron" data-lucide="chevron-down" class="w-4 h-4 text-slate-400 transition-transform"></i>
+        </button>
+        <div id="tips-content" class="px-4 pb-4 hidden space-y-3 text-xs text-slate-300 border-t border-slate-800/80 pt-3">
+          <ol class="list-decimal list-inside space-y-1.5 leading-relaxed text-slate-300">
+            <li id="ui-tip-1">Hold the phone about 6 to 8 inches away from your mouth.</li>
+            <li id="ui-tip-2">Turn off background TVs, fans, or AC units.</li>
+            <li id="ui-tip-3">Do not use bluetooth headphones or hearing aids; a dedicated microphone is okay.</li>
+          </ol>
+          <div class="pt-2 flex justify-center">
+            <img src="https://github.com/xStix99x/sound-capsule/blob/main/Diagram.jpg?raw=true" alt="Recording Distance Diagram" class="rounded-xl border border-slate-700/80 max-h-48 object-contain shadow-md">
+          </div>
+        </div>
       </div>
 
       <!-- VISUALIZER / RECORDING STATUS AREA -->
@@ -101,7 +122,7 @@
             <label id="ui-label-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
               Your Name <span class="text-rose-400">*</span>
             </label>
-            <input type="text" id="user-name" placeholder="e.g. Name" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
+            <input type="text" id="user-name" placeholder="e.g. Grandma Helen" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
           </div>
 
           <div>
@@ -116,6 +137,18 @@
         <div id="validation-error" class="hidden text-xs text-rose-400 font-semibold bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl flex items-center gap-2">
           <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
           <span id="ui-validation-msg">Please fill out both your name and title before sending.</span>
+        </div>
+
+        <!-- Upload Error & Local Download Fallback Box -->
+        <div id="upload-error-box" class="hidden text-xs bg-rose-500/10 border border-rose-500/30 p-4 rounded-2xl space-y-3">
+          <div class="flex items-start gap-2 text-rose-300 font-semibold">
+            <i data-lucide="wifi-off" class="w-5 h-5 shrink-0 text-rose-400"></i>
+            <span id="ui-upload-failed-msg">Unable to upload due to connection issues. Don't worry! You can save the recording directly to your phone:</span>
+          </div>
+          <button onclick="downloadRecordingLocally()" class="w-full py-3 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all active:scale-95">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span id="ui-download-fallback-btn">Download Recording to Phone</span>
+          </button>
         </div>
 
         <!-- Progress Bar & Wheel (Hidden Initially) -->
@@ -205,26 +238,31 @@
       <div class="flex items-center justify-between border-b border-slate-700 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
           <i data-lucide="settings" class="w-5 h-5 text-rose-400"></i>
-          Dropbox Configuration
+          Admin Configuration
         </h3>
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
-      <div class="space-y-3 text-xs">
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-300 mb-1">Audio Format & Quality</label>
+          <select id="audio-format-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-rose-500">
+            <option value="wav">WAV — Uncompressed Lossless (44.1 kHz)</option>
+            <option value="m4a">AAC / M4A — Compressed High Quality (Smaller File Size)</option>
+          </select>
+        </div>
+
         <div>
           <label class="block font-semibold text-slate-300 mb-1">Dropbox Access Token</label>
-          <textarea id="dropbox-token-input" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white font-mono text-xs focus:outline-none focus:border-rose-500"></textarea>
+          <textarea id="dropbox-token-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-white font-mono text-xs focus:outline-none focus:border-rose-500"></textarea>
         </div>
-        <p class="text-slate-400">
-          This token allows family members to upload files directly into your Dropbox folder in the background.
-        </p>
       </div>
 
       <div class="pt-2 flex gap-2">
         <button onclick="saveSettings()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-all">
-          Save Token
+          Save Settings
         </button>
         <button onclick="closeSettingsModal()" class="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold rounded-xl text-sm transition-all">
           Cancel
@@ -244,14 +282,20 @@
         title: "Sound Capsule",
         subtitle: "Record a story, song, or lullaby for <span class='font-bold text-rose-400'>Alice</span> directly from your phone!",
         warning: "<strong class='font-semibold text-amber-300'>Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.</strong>",
+        tipsTitle: "💡 Tips for the Best Recording",
+        tip1: "Hold the phone about 6 to 8 inches away from your mouth.",
+        tip2: "Turn off background TVs, fans, or AC units.",
+        tip3: "Do not use bluetooth headphones or hearing aids; a dedicated microphone is okay.",
         readyText: "Ready to record",
         startRecord: "Start Recording",
         stopRecord: "Stop & Review",
         labelName: "Your Name *",
         labelTitle: "Song or Story Title *",
-        placeholderName: "e.g. Name",
+        placeholderName: "e.g. Grandma Helen",
         placeholderTitle: "e.g. You Are My Sunshine",
         validationMsg: "Please fill out both your name and title before sending.",
+        uploadFailedMsg: "Unable to upload due to connection issues. Don't worry! You can save the recording directly to your phone:",
+        downloadFallbackBtn: "Download Recording to Phone",
         uploading: "Sending to Alice's Dropbox...",
         sendBtn: "Send to Alice",
         recordAnother: "Record Another Song or Story",
@@ -265,14 +309,20 @@
         title: "Sound Capsule",
         subtitle: "¡Graba una historia, canción o nana para <span class='font-bold text-rose-400'>Alice</span> directamente desde tu teléfono!",
         warning: "<strong class='font-semibold text-amber-300'>Por favor, graba en una habitación silenciosa y asegúrate de no usar auriculares Bluetooth ni audífonos.</strong>",
+        tipsTitle: "💡 Consejos para la Mejor Grabación",
+        tip1: "Sostén el teléfono a unos 15 o 20 cm de tu boca.",
+        tip2: "Apaga televisores, ventiladores o aire acondicionado de fondo.",
+        tip3: "No uses auriculares Bluetooth ni audífonos; un micrófono dedicado está bien.",
         readyText: "Listo para grabar",
         startRecord: "Iniciar Grabación",
         stopRecord: "Detener y Revisar",
         labelName: "Tu Nombre *",
         labelTitle: "Título de la Canción u Historia *",
-        placeholderName: "ej. Nombre",
+        placeholderName: "ej. Abuela Elena",
         placeholderTitle: "ej. Cielito Lindo",
         validationMsg: "Por favor completa tu nombre y el título antes de enviar.",
+        uploadFailedMsg: "No se pudo subir debido a problemas de conexión. ¡No te preocupes! Puedes guardar la grabación directamente en tu teléfono:",
+        downloadFallbackBtn: "Descargar Grabación en el Teléfono",
         uploading: "Enviando al Dropbox de Alice...",
         sendBtn: "Enviar a Alice",
         recordAnother: "Grabar Otra Canción o Historia",
@@ -301,6 +351,10 @@
       document.getElementById('ui-title').innerText = t.title;
       document.getElementById('ui-subtitle').innerHTML = t.subtitle;
       document.getElementById('ui-warning').innerHTML = t.warning;
+      document.getElementById('ui-tips-title').innerHTML = `<i data-lucide="lightbulb" class="w-4 h-4 text-amber-400"></i> ${t.tipsTitle}`;
+      document.getElementById('ui-tip-1').innerText = t.tip1;
+      document.getElementById('ui-tip-2').innerText = t.tip2;
+      document.getElementById('ui-tip-3').innerText = t.tip3;
       document.getElementById('ui-ready-text').innerText = t.readyText;
       
       if (!isRecording) {
@@ -314,6 +368,8 @@
       document.getElementById('user-name').placeholder = t.placeholderName;
       document.getElementById('song-title').placeholder = t.placeholderTitle;
       document.getElementById('ui-validation-msg').innerText = t.validationMsg;
+      document.getElementById('ui-upload-failed-msg').innerText = t.uploadFailedMsg;
+      document.getElementById('ui-download-fallback-btn').innerText = t.downloadFallbackBtn;
       document.getElementById('ui-uploading-text').childNodes[2].nodeValue = " " + t.uploading;
       document.getElementById('ui-send-btn-text').innerText = t.sendBtn;
       document.getElementById('ui-record-another-btn').innerText = t.recordAnother;
@@ -323,6 +379,14 @@
       document.getElementById('ui-settings-footer').innerText = t.settingsFooter;
       document.getElementById('ui-passcode-title').innerText = t.passcodeTitle;
       document.getElementById('ui-passcode-prompt').innerText = t.passcodePrompt;
+      lucide.createIcons();
+    }
+
+    function toggleTips() {
+      const content = document.getElementById('tips-content');
+      const chevron = document.getElementById('tips-chevron');
+      content.classList.toggle('hidden');
+      chevron.classList.toggle('rotate-180');
     }
 
     // AUDIO RECORDING LOGIC
@@ -332,6 +396,7 @@
     let isRecording = false;
     let timerInterval = null;
     let secondsElapsed = 0;
+    let wakeLock = null;
 
     let audioCtx, analyser, dataArray, canvasCtx, animationFrameId;
 
@@ -343,18 +408,46 @@
       }
     }
 
+    async function requestWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('WakeLock error:', err);
+      }
+    }
+
+    function releaseWakeLock() {
+      if (wakeLock) {
+        wakeLock.release().then(() => { wakeLock = null; });
+      }
+    }
+
     async function startRecording() {
       try {
+        const formatSetting = localStorage.getItem('app_audio_format') || 'wav';
+        const sampleRate = 44100; // Capped at 44.1 kHz
+
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: { 
             echoCancellation: false, 
             noiseSuppression: false, 
             autoGainControl: false,
-            sampleRate: 48000
+            sampleRate: sampleRate
           } 
         });
 
-        mediaRecorder = new MediaRecorder(stream);
+        requestWakeLock();
+
+        const options = {};
+        if (formatSetting === 'm4a' && MediaRecorder.isTypeSupported('audio/mp4')) {
+          options.mimeType = 'audio/mp4';
+        } else if (formatSetting === 'm4a' && MediaRecorder.isTypeSupported('audio/aac')) {
+          options.mimeType = 'audio/aac';
+        }
+
+        mediaRecorder = new MediaRecorder(stream, options);
         audioChunks = [];
 
         mediaRecorder.ondataavailable = event => {
@@ -362,8 +455,15 @@
         };
 
         mediaRecorder.onstop = async () => {
-          const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
-          audioBlob = await convertToWav(webmBlob);
+          releaseWakeLock();
+          const rawBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          
+          if (formatSetting === 'wav') {
+            audioBlob = await convertToWav(rawBlob, 44100);
+          } else {
+            audioBlob = rawBlob;
+          }
+
           const audioUrl = URL.createObjectURL(audioBlob);
           document.getElementById('audio-preview').src = audioUrl;
           
@@ -448,10 +548,10 @@
       draw();
     }
 
-    // WAV ENCODER
-    async function convertToWav(blob) {
+    // WAV ENCODER (CAPPED AT 44.1 kHz)
+    async function convertToWav(blob, targetSampleRate = 44100) {
       const arrayBuffer = await blob.arrayBuffer();
-      const tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const tempAudioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: targetSampleRate });
       const audioBuffer = await tempAudioCtx.decodeAudioData(arrayBuffer);
       return bufferToWave(audioBuffer, audioBuffer.length);
     }
@@ -500,17 +600,39 @@
       return new Blob([buffer], { type: "audio/wav" });
     }
 
-    // DIRECT DROPBOX BACKGROUND UPLOAD
-    function sendRecording() {
+    // DIRECT DROPBOX UPLOAD WITH RETRIES & FALLBACK DOWNLOAD
+    function getFormattedFileName() {
+      const userName = document.getElementById('user-name').value.trim();
+      const songTitle = document.getElementById('song-title').value.trim();
+      const formatSetting = localStorage.getItem('app_audio_format') || 'wav';
+      const ext = formatSetting === 'wav' ? 'wav' : 'm4a';
+      const sanitize = str => str.replace(/[^a-zA-Z0-9 -]/g, '').trim();
+      return `${sanitize(userName)} - ${sanitize(songTitle)}.${ext}`;
+    }
+
+    function downloadRecordingLocally() {
+      if (!audioBlob) return;
+      const fileName = getFormattedFileName();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(audioBlob);
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function sendRecording(retryCount = 0) {
       const userName = document.getElementById('user-name').value.trim();
       const songTitle = document.getElementById('song-title').value.trim();
       const validationError = document.getElementById('validation-error');
+      const uploadErrorBox = document.getElementById('upload-error-box');
 
       if (!userName || !songTitle) {
         validationError.classList.remove('hidden');
         return;
       }
       validationError.classList.add('hidden');
+      uploadErrorBox.classList.add('hidden');
 
       const token = localStorage.getItem('app_dropbox_token') || DEFAULT_DROPBOX_TOKEN;
       if (!token) {
@@ -518,8 +640,7 @@
         return;
       }
 
-      const sanitize = str => str.replace(/[^a-zA-Z0-9 -]/g, '').trim();
-      const fileName = `${sanitize(userName)} - ${sanitize(songTitle)}.wav`;
+      const fileName = getFormattedFileName();
 
       document.getElementById('upload-progress-container').classList.remove('hidden');
       document.getElementById('send-btn').disabled = true;
@@ -548,18 +669,35 @@
           document.getElementById('controls-step-2').classList.add('hidden');
           document.getElementById('controls-step-3').classList.remove('hidden');
         } else {
-          alert('Upload failed. Please check your network or Dropbox token.');
-          document.getElementById('send-btn').disabled = false;
+          handleUploadError(retryCount);
         }
       };
 
+      xhr.onerror = () => {
+        handleUploadError(retryCount);
+      };
+
       xhr.send(audioBlob);
+    }
+
+    function handleUploadError(retryCount) {
+      if (retryCount < 2) {
+        // Retry up to 3 times automatically
+        setTimeout(() => {
+          sendRecording(retryCount + 1);
+        }, 1500);
+      } else {
+        document.getElementById('upload-progress-container').classList.add('hidden');
+        document.getElementById('upload-error-box').classList.remove('hidden');
+        document.getElementById('send-btn').disabled = false;
+      }
     }
 
     function resetApp() {
       document.getElementById('user-name').value = '';
       document.getElementById('song-title').value = '';
       document.getElementById('upload-progress-container').classList.add('hidden');
+      document.getElementById('upload-error-box').classList.add('hidden');
       document.getElementById('upload-progress-bar').style.width = '0%';
       document.getElementById('upload-percentage').innerText = '0%';
       document.getElementById('send-btn').disabled = false;
@@ -597,6 +735,7 @@
 
     function openSettingsModal() {
       document.getElementById('dropbox-token-input').value = localStorage.getItem('app_dropbox_token') || DEFAULT_DROPBOX_TOKEN;
+      document.getElementById('audio-format-select').value = localStorage.getItem('app_audio_format') || 'wav';
       document.getElementById('settings-modal').classList.remove('hidden');
     }
 
@@ -606,14 +745,15 @@
 
     function saveSettings() {
       const token = document.getElementById('dropbox-token-input').value.trim();
+      const format = document.getElementById('audio-format-select').value;
       localStorage.setItem('app_dropbox_token', token);
+      localStorage.setItem('app_audio_format', format);
       closeSettingsModal();
       alert('Settings saved!');
     }
 
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
       setLanguage('en');
     });
   </script>
