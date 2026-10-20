@@ -11,6 +11,57 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
+    :root {
+      --bg-main: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(51, 65, 85, 0.7);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary-btn: #e11d48;
+      --primary-btn-hover: #f43f5e;
+      --accent-color: #f43f5e;
+      --sec-btn-bg: rgba(51, 65, 85, 0.8);
+      --sec-btn-text: #e2e8f0;
+    }
+
+    /* THEMES DEFINITIONS */
+    body.theme-1 { --bg-main: #0f172a; --card-bg: rgba(30, 41, 59, 0.75); --card-border: rgba(51, 65, 85, 0.7); --text-main: #f8fafc; --text-muted: #94a3b8; --primary-btn: #e11d48; --primary-btn-hover: #f43f5e; --accent-color: #fb7185; }
+    body.theme-2 { --bg-main: #f5f0e6; --card-bg: rgba(255, 255, 255, 0.85); --card-border: rgba(215, 204, 186, 0.8); --text-main: #2b2118; --text-muted: #6e5d4f; --primary-btn: #c25e00; --primary-btn-hover: #d97706; --accent-color: #c25e00; --sec-btn-bg: #e8ded1; --sec-btn-text: #2b2118; }
+    body.theme-3 { --bg-main: #13112c; --card-bg: rgba(30, 27, 75, 0.75); --card-border: rgba(67, 56, 202, 0.5); --text-main: #f5f3ff; --text-muted: #a5b4fc; --primary-btn: #8b5cf6; --primary-btn-hover: #a855f7; --accent-color: #c084fc; }
+    body.theme-4 { --bg-main: #041e2b; --card-bg: rgba(15, 30, 45, 0.75); --card-border: rgba(13, 148, 136, 0.4); --text-main: #f0fdfa; --text-muted: #99f6e4; --primary-btn: #0d9488; --primary-btn-hover: #14b8a6; --accent-color: #2dd4bf; }
+    body.theme-5 { --bg-main: #0a192f; --card-bg: rgba(17, 34, 64, 0.75); --card-border: rgba(217, 119, 6, 0.4); --text-main: #ffffff; --text-muted: #cbd5e1; --primary-btn: #d97706; --primary-btn-hover: #f59e0b; --accent-color: #f59e0b; }
+    body.theme-6 { --bg-main: #062c1e; --card-bg: rgba(19, 62, 42, 0.75); --card-border: rgba(34, 197, 94, 0.3); --text-main: #f0fdf4; --text-muted: #86efac; --primary-btn: #ea580c; --primary-btn-hover: #f97316; --accent-color: #fb923c; }
+    body.theme-7 { --bg-main: #f1f5f9; --card-bg: rgba(255, 255, 255, 0.9); --card-border: rgba(203, 213, 225, 0.8); --text-main: #0f172a; --text-muted: #475569; --primary-btn: #f43f5e; --primary-btn-hover: #e11d48; --accent-color: #f43f5e; --sec-btn-bg: #e2e8f0; --sec-btn-text: #0f172a; }
+    body.theme-8 { --bg-main: #e2e8f0; --card-bg: rgba(255, 255, 255, 0.85); --card-border: rgba(148, 163, 184, 0.6); --text-main: #1e293b; --text-muted: #475569; --primary-btn: #0284c7; --primary-btn-hover: #0369a1; --accent-color: #0284c7; --sec-btn-bg: #cbd5e1; --sec-btn-text: #1e293b; }
+    body.theme-9 { --bg-main: #030712; --card-bg: rgba(17, 24, 39, 0.8); --card-border: rgba(236, 72, 153, 0.4); --text-main: #f9fafb; --text-muted: #f472b6; --primary-btn: #ec4899; --primary-btn-hover: #f43f5e; --accent-color: #a855f7; }
+    body.theme-10 { --bg-main: #1c130e; --card-bg: rgba(46, 31, 24, 0.75); --card-border: rgba(234, 88, 12, 0.4); --text-main: #fef3c7; --text-muted: #fde68a; --primary-btn: #ea580c; --primary-btn-hover: #f97316; --accent-color: #f97316; }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .themed-card {
+      background-color: var(--card-bg);
+      border-color: var(--card-border);
+    }
+
+    .themed-primary-btn {
+      background-color: var(--primary-btn);
+    }
+    .themed-primary-btn:hover {
+      background-color: var(--primary-btn-hover);
+    }
+
+    .themed-text-accent {
+      color: var(--accent-color);
+    }
+
+    .themed-text-muted {
+      color: var(--text-muted);
+    }
+
     @keyframes pulse-ring {
       0% { transform: scale(0.95); opacity: 0.8; }
       50% { transform: scale(1.08); opacity: 0.4; }
@@ -21,7 +72,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased relative selection:bg-rose-500 selection:text-white">
+<body class="theme-1 min-h-screen flex flex-col font-sans antialiased relative selection:bg-rose-500 selection:text-white">
 
   <!-- TOP-RIGHT LANGUAGE TOGGLE -->
   <div class="absolute top-4 right-4 z-50 flex items-center gap-1 bg-slate-800/80 backdrop-blur border border-slate-700/60 rounded-full p-1 text-xs font-semibold shadow-lg">
@@ -37,19 +88,19 @@
     
     <!-- HEADER -->
     <header class="text-center mt-6 mb-6">
-      <div class="inline-flex items-center justify-center p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl mb-4 text-rose-400 shadow-inner">
+      <div class="inline-flex items-center justify-center p-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl mb-4 themed-text-accent shadow-inner">
         <i data-lucide="mic" class="w-8 h-8"></i>
       </div>
       <h1 id="ui-title" class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
         Sound Capsule
       </h1>
-      <p id="ui-subtitle" class="text-slate-400 text-sm sm:text-base max-w-md mx-auto">
-        Record a story, song, or lullaby for <span class="font-bold text-rose-400">Alice</span> directly from your phone!
+      <p id="ui-subtitle" class="themed-text-muted text-sm sm:text-base max-w-md mx-auto">
+        Record a story, song, or lullaby for <span class="font-bold themed-text-accent">Alice</span> directly from your phone!
       </p>
     </header>
 
     <!-- MAIN RECORDING CARD -->
-    <main class="bg-slate-800/60 backdrop-blur-md border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+    <main class="themed-card backdrop-blur-md border rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
       
       <!-- INSTRUCTIONS / WARNING BOX -->
       <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-start gap-3">
@@ -95,17 +146,64 @@
         </div>
 
         <!-- Timer Display -->
-        <div id="timer-display" class="hidden text-3xl font-mono font-bold tracking-wider text-rose-400 mt-2">
+        <div id="timer-display" class="hidden text-3xl font-mono font-bold tracking-wider themed-text-accent mt-2">
           00:00
         </div>
       </div>
 
       <!-- RECORDING CONTROLS -->
-      <div id="controls-step-1" class="flex flex-col items-center gap-4">
-        <button id="record-btn" onclick="toggleRecording()" class="w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 active:scale-95">
+      <div id="controls-step-1" class="flex flex-col items-center gap-5">
+        <button id="record-btn" onclick="toggleRecording()" class="w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 themed-primary-btn text-white shadow-lg active:scale-95">
           <i data-lucide="disc" class="w-6 h-6"></i>
           <span id="record-btn-text">Start Recording</span>
         </button>
+
+        <!-- INLINE COLOR PALETTE PICKER -->
+        <div class="w-full pt-2 border-t border-slate-700/40">
+          <div class="flex items-center justify-between mb-2">
+            <span id="ui-palette-label" class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="palette" class="w-3.5 h-3.5 themed-text-accent"></i>
+              App Theme Palette
+            </span>
+            <span id="current-theme-name" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300">
+              Midnight Rose
+            </span>
+          </div>
+
+          <!-- Color Swatches Grid -->
+          <div class="grid grid-cols-5 gap-2 pt-1">
+            <button onclick="setTheme(1)" title="Midnight Rose" class="h-8 rounded-xl border-2 border-white/80 bg-slate-900 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            </button>
+            <button onclick="setTheme(2)" title="Warm Storybook" class="h-8 rounded-xl border border-slate-700 bg-amber-50 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-amber-700"></span>
+            </button>
+            <button onclick="setTheme(3)" title="Lullaby Lavender" class="h-8 rounded-xl border border-slate-700 bg-indigo-950 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+            </button>
+            <button onclick="setTheme(4)" title="Ocean Sanctuary" class="h-8 rounded-xl border border-slate-700 bg-cyan-950 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-teal-500"></span>
+            </button>
+            <button onclick="setTheme(5)" title="Heritage Gold" class="h-8 rounded-xl border border-slate-700 bg-blue-950 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+            </button>
+            <button onclick="setTheme(6)" title="Botanical Garden" class="h-8 rounded-xl border border-slate-700 bg-emerald-950 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-orange-500"></span>
+            </button>
+            <button onclick="setTheme(7)" title="Playful Sunshine" class="h-8 rounded-xl border border-slate-700 bg-slate-100 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            </button>
+            <button onclick="setTheme(8)" title="Soft Nordic" class="h-8 rounded-xl border border-slate-700 bg-slate-300 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-sky-600"></span>
+            </button>
+            <button onclick="setTheme(9)" title="Cosmic Starlight" class="h-8 rounded-xl border border-slate-700 bg-black flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+            </button>
+            <button onclick="setTheme(10)" title="Sunset Cocoa" class="h-8 rounded-xl border border-slate-700 bg-stone-900 flex items-center justify-center overflow-hidden hover:scale-105 transition-all shadow-sm">
+              <span class="w-3 h-3 rounded-full bg-orange-600"></span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- REVIEW & FORM STEP (HIDDEN INITIALLY) -->
@@ -120,14 +218,14 @@
         <div class="space-y-4">
           <div>
             <label id="ui-label-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
-              Your Name <span class="text-rose-400">*</span>
+              Your Name <span class="themed-text-accent">*</span>
             </label>
             <input type="text" id="user-name" placeholder="e.g. Grandma Helen" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
           </div>
 
           <div>
             <label id="ui-label-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1">
-              Song or Story Title <span class="text-rose-400">*</span>
+              Song or Story Title <span class="themed-text-accent">*</span>
             </label>
             <input type="text" id="song-title" placeholder="e.g. You Are My Sunshine" class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 transition-colors">
           </div>
@@ -155,10 +253,10 @@
         <div id="upload-progress-container" class="hidden space-y-2">
           <div class="flex items-center justify-between text-xs text-slate-300 font-semibold">
             <span id="ui-uploading-text" class="flex items-center gap-2">
-              <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-rose-400"></i>
+              <i data-lucide="loader-2" class="w-4 h-4 animate-spin themed-text-accent"></i>
               Sending to Alice's Dropbox...
             </span>
-            <span id="upload-percentage" class="text-rose-400 font-mono">0%</span>
+            <span id="upload-percentage" class="themed-text-accent font-mono">0%</span>
           </div>
           <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden border border-slate-800">
             <div id="upload-progress-bar" class="bg-rose-500 h-full w-0 transition-all duration-150"></div>
@@ -190,7 +288,7 @@
           <h2 id="ui-success-title" class="text-2xl font-bold text-white mb-1">Recording Sent!</h2>
           <p id="ui-success-msg" class="text-slate-400 text-sm">Thank you so much for capturing this sweet memory for Alice.</p>
         </div>
-        <button onclick="resetApp()" class="w-full py-4 px-6 rounded-2xl font-bold text-base bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30 transition-all active:scale-95 flex items-center justify-center gap-2">
+        <button onclick="resetApp()" class="w-full py-4 px-6 rounded-2xl font-bold text-base themed-primary-btn text-white shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
           <i data-lucide="plus-circle" class="w-5 h-5"></i>
           <span id="ui-record-another-success">Record Another Song or Story</span>
         </button>
@@ -214,7 +312,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 id="ui-passcode-title" class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="shield-lock" class="w-5 h-5 text-rose-400"></i>
+          <i data-lucide="shield-lock" class="w-5 h-5 themed-text-accent"></i>
           Admin Access
         </h3>
         <button onclick="closePasscodeModal()" class="text-slate-400 hover:text-white">
@@ -226,7 +324,7 @@
       <div id="passcode-error" class="hidden text-xs text-rose-400 text-center font-semibold">
         Incorrect passcode. Please try again.
       </div>
-      <button onclick="verifyPasscode()" class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl text-sm transition-all">
+      <button onclick="verifyPasscode()" class="w-full py-3 themed-primary-btn text-white font-bold rounded-xl text-sm transition-all">
         Unlock Settings
       </button>
     </div>
@@ -237,7 +335,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-3xl p-6 w-full max-w-md space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-700 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="settings" class="w-5 h-5 text-rose-400"></i>
+          <i data-lucide="settings" class="w-5 h-5 themed-text-accent"></i>
           Admin Configuration
         </h3>
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
@@ -282,11 +380,31 @@
       es: "https://github.com/xStix99x/sound-capsule/blob/main/diagram%20spanish.jpeg?raw=true"
     };
 
+    // THEME NAMES
+    const themeNames = {
+      1: "Midnight Rose",
+      2: "Warm Storybook",
+      3: "Lullaby Lavender",
+      4: "Ocean Sanctuary",
+      5: "Heritage Gold",
+      6: "Botanical Garden",
+      7: "Playful Sunshine",
+      8: "Soft Nordic",
+      9: "Cosmic Starlight",
+      10: "Sunset Cocoa"
+    };
+
+    function setTheme(themeNum) {
+      document.body.className = `theme-${themeNum} min-h-screen flex flex-col font-sans antialiased relative selection:bg-rose-500 selection:text-white`;
+      document.getElementById('current-theme-name').innerText = themeNames[themeNum] || "Theme " + themeNum;
+      localStorage.setItem('app_selected_theme', themeNum);
+    }
+
     // TRANSLATIONS DICTIONARY
     const i18n = {
       en: {
         title: "Sound Capsule",
-        subtitle: "Record a story, song, or lullaby for <span class='font-bold text-rose-400'>Alice</span> directly from your phone!",
+        subtitle: "Record a story, song, or lullaby for <span class='font-bold themed-text-accent'>Alice</span> directly from your phone!",
         warning: "<strong class='font-semibold text-amber-300'>Please record in a quiet room, and be sure you aren't using any bluetooth headphones or hearing aids.</strong>",
         tipsTitle: "💡 Tips for the Best Recording",
         tip1: "Hold the phone about 6 to 8 inches away from your mouth.",
@@ -313,7 +431,7 @@
       },
       es: {
         title: "Sound Capsule",
-        subtitle: "¡Graba una historia, canción o nana para <span class='font-bold text-rose-400'>Alice</span> directamente desde tu teléfono!",
+        subtitle: "¡Graba una historia, canción o nana para <span class='font-bold themed-text-accent'>Alice</span> directamente desde tu teléfono!",
         warning: "<strong class='font-semibold text-amber-300'>Por favor, graba en una habitación silenciosa y asegúrate de no usar auriculares Bluetooth ni audífonos.</strong>",
         tipsTitle: "💡 Consejos para la Mejor Grabación",
         tip1: "Sostén el teléfono a unos 15 o 20 cm de tu boca.",
@@ -373,8 +491,8 @@
         document.getElementById('record-btn-text').innerText = t.stopRecord;
       }
 
-      document.getElementById('ui-label-name').innerHTML = `${t.labelName.split('*')[0]} <span class="text-rose-400">*</span>`;
-      document.getElementById('ui-label-title').innerHTML = `${t.labelTitle.split('*')[0]} <span class="text-rose-400">*</span>`;
+      document.getElementById('ui-label-name').innerHTML = `${t.labelName.split('*')[0]} <span class="themed-text-accent">*</span>`;
+      document.getElementById('ui-label-title').innerHTML = `${t.labelTitle.split('*')[0]} <span class="themed-text-accent">*</span>`;
       document.getElementById('user-name').placeholder = t.placeholderName;
       document.getElementById('song-title').placeholder = t.placeholderTitle;
       document.getElementById('ui-validation-msg').innerText = t.validationMsg;
@@ -517,7 +635,7 @@
         clearInterval(timerInterval);
         if (animationFrameId) cancelAnimationFrame(animationFrameId);
 
-        document.getElementById('record-btn').className = "w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/30";
+        document.getElementById('record-btn').className = "w-full py-4 px-6 rounded-2xl font-bold text-base sm:text-lg flex items-center justify-center gap-3 transition-all duration-200 themed-primary-btn text-white shadow-lg";
       }
     }
 
@@ -764,6 +882,8 @@
 
     // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('app_selected_theme') || 1;
+      setTheme(parseInt(savedTheme));
       setLanguage('en');
     });
   </script>
