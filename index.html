@@ -91,10 +91,12 @@
                     <div>
                         <label for="sender-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Your Name *</label>
                         <input type="text" id="sender-name" placeholder="e.g. Grandma Helen / Uncle David" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
+                        <p id="sender-name-error" class="hidden text-xs text-rose-600 font-medium mt-1">Please enter your name.</p>
                     </div>
                     <div>
-                        <label for="recording-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Song / Story Title (Optional)</label>
+                        <label for="recording-title" class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Song / Story Title *</label>
                         <input type="text" id="recording-title" placeholder="e.g. Bedtime Lullaby & Wishes" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-slate-800 placeholder-slate-400 text-sm transition">
+                        <p id="recording-title-error" class="hidden text-xs text-rose-600 font-medium mt-1">Please enter a song or story title.</p>
                     </div>
                 </div>
 
@@ -320,6 +322,11 @@
         
         const displayTitle = document.getElementById('display-title');
         const displayInstructions = document.getElementById('display-instructions');
+        
+        const inputSenderName = document.getElementById('sender-name');
+        const inputRecordingTitle = document.getElementById('recording-title');
+        const errorSenderName = document.getElementById('sender-name-error');
+        const errorRecordingTitle = document.getElementById('recording-title-error');
         
         const recordControlsContainer = document.getElementById('record-controls-container');
         const btnRecord = document.getElementById('record-btn');
@@ -598,6 +605,56 @@
             canvasCtx.clearRect(0, 0, canvasVisualizer.width, canvasVisualizer.height);
         });
 
+        // Helper to sanitize filenames safely for Dropbox
+        function sanitizeFilename(str) {
+            return str
+                .trim()
+                .replace(/[/\\?%*:|"<>]/g, '') // remove forbidden path characters
+                .replace(/\s+/g, ' ');         // collapse multiple spaces
+        }
+
+        // Form Validation for Name & Title
+        function validateInputs() {
+            let isValid = true;
+            const senderNameVal = inputSenderName.value.trim();
+            const recordingTitleVal = inputRecordingTitle.value.trim();
+
+            if (!senderNameVal) {
+                inputSenderName.classList.add('border-rose-500', 'bg-rose-50/30');
+                errorSenderName.classList.remove('hidden');
+                isValid = false;
+            } else {
+                inputSenderName.classList.remove('border-rose-500', 'bg-rose-50/30');
+                errorSenderName.classList.add('hidden');
+            }
+
+            if (!recordingTitleVal) {
+                inputRecordingTitle.classList.add('border-rose-500', 'bg-rose-50/30');
+                errorRecordingTitle.classList.remove('hidden');
+                isValid = false;
+            } else {
+                inputRecordingTitle.classList.remove('border-rose-500', 'bg-rose-50/30');
+                errorRecordingTitle.classList.add('hidden');
+            }
+
+            return isValid;
+        }
+
+        // Remove error styling on user typing
+        inputSenderName.addEventListener('input', () => {
+            if (inputSenderName.value.trim()) {
+                inputSenderName.classList.remove('border-rose-500', 'bg-rose-50/30');
+                errorSenderName.classList.add('hidden');
+            }
+        });
+
+        inputRecordingTitle.addEventListener('input', () => {
+            if (inputRecordingTitle.value.trim()) {
+                inputRecordingTitle.classList.remove('border-rose-500', 'bg-rose-50/30');
+                errorRecordingTitle.classList.add('hidden');
+            }
+        });
+
         // Update Progress UI
         function setUploadProgress(percent) {
             progressText.textContent = `${Math.round(percent)}%`;
@@ -645,11 +702,18 @@
 
         // Submit Action (Send to Alice)
         btnSubmit.addEventListener('click', async () => {
-            const senderName = document.getElementById('sender-name').value.trim() || 'Family_Member';
-            const recordTitle = document.getElementById('recording-title').value.trim() || 'Story';
+            if (!validateInputs()) {
+                formInputs.classList.remove('hidden');
+                formInputs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            const senderName = sanitizeFilename(inputSenderName.value);
+            const recordTitle = sanitizeFilename(inputRecordingTitle.value);
             const fileExt = config.audioFormat === 'wav' ? 'wav' : 'mp3';
-            const dateStr = new Date().toISOString().slice(0,10);
-            const fileName = `Alice_Story_${senderName.replace(/\s+/g, '_')}_${dateStr}.${fileExt}`;
+            
+            // Format strictly as: "[Name] - [Song or Story Title].[ext]"
+            const fileName = `${senderName} - ${recordTitle}.${fileExt}`;
 
             if (!audioBlob) return;
 
@@ -683,7 +747,7 @@
                     formData.append('recordingTitle', recordTitle);
 
                     await fetch(config.webhook, { method: 'POST', body: formData });
-                    setUploadSuccess = true;
+                    uploadSuccess = true;
                     setUploadProgress(100);
                 } catch (err) {
                     console.warn("Webhook upload failed:", err);
@@ -692,7 +756,7 @@
 
             // If no token or network failed, auto-trigger local download backup
             if (!config.dropboxToken && !config.webhook) {
-                triggerLocalDownload(senderName, fileExt);
+                triggerLocalDownload(fileName);
             }
 
             // Transition to Success Screen
@@ -701,12 +765,12 @@
             successView.classList.remove('hidden');
         });
 
-        function triggerLocalDownload(senderName, fileExt) {
+        function triggerLocalDownload(fileName) {
             if (!audioUrl) return;
             const a = document.createElement('a');
             a.style.display = 'none';
             a.href = audioUrl;
-            a.download = `Story_for_Alice_from_${senderName.replace(/\s+/g, '_')}.${fileExt || 'wav'}`;
+            a.download = fileName;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -714,9 +778,11 @@
 
         // Local Backup Download Button
         btnDownloadFallback.addEventListener('click', () => {
-            const senderName = document.getElementById('sender-name').value.trim() || 'FamilyMember';
+            const senderName = sanitizeFilename(inputSenderName.value) || 'FamilyMember';
+            const recordTitle = sanitizeFilename(inputRecordingTitle.value) || 'Story';
             const fileExt = config.audioFormat === 'wav' ? 'wav' : 'mp3';
-            triggerLocalDownload(senderName, fileExt);
+            const fileName = `${senderName} - ${recordTitle}.${fileExt}`;
+            triggerLocalDownload(fileName);
         });
 
         // Record Another Song or Story Button
@@ -724,6 +790,10 @@
             successView.classList.add('hidden');
             formInputs.classList.remove('hidden');
             recordControlsContainer.classList.remove('hidden');
+            
+            // Clear input fields for next entry
+            inputRecordingTitle.value = '';
+            
             audioBlob = null;
             audioUrl = null;
             timerDisplay.textContent = '00:00';
